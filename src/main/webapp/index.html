@@ -1,228 +1,39 @@
 <!DOCTYPE html>
 <html ng-app="rylc">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 
-  <link rel="stylesheet" href="lib/jquery.mobile.css">
-  <link rel="stylesheet" href="rylc.css">
+    <!-- make page testable for jasmine ui -->
+    <script type="text/javascript">eval(sessionStorage.jasmineui);</script>
 
-  <!-- make page testable for jasmine ui -->
-  <script type="text/javascript">eval(sessionStorage.jasmineui);</script>
+    <link rel="stylesheet" href="main.css">
+    <script src="lib/require.js" data-main="main"></script>
 
-  <!-- Libraries -->
-  <script src="lib/JSONParseDate.js"></script>
-  <script src="lib/Base64.js"></script>
-  <script src="lib/jquery.js"></script>
-  <script src="lib/jquery.mobile.js"></script>
-  <script src="lib/angular.js"></script>
-  <script src="lib/jquery-mobile-angular-adapter.js"></script>
-
-  <!-- Application -->
-  <script src="app/services.js"></script>
-  <script src="app/controllers.js"></script>
-  <script src="app/markup.js"></script>
-  <script src="app/application.js"></script>
-
-  <title>RYLC</title>
+    <title>RYLC</title>
 </head>
 <body>
 
 <div id="loginPage" data-role="page" ngm-shared-controller="auth:rylc.AuthenticationController">
-  <div data-role="header">
-    <h1>RYLC - Login</h1>
-  </div>
-  <div data-role="content">
-    <div class="error" ngm-if="auth.errorMessage">{{auth.errorMessage}}</div>
-    <form data-ajax="false" ng-submit="auth.login()" name="loginForm">
-      <div data-role="fieldcontain">
-        <label for="loginPage_username">Benutzername</label>
-        <input type="text" ng-model="auth.username" id="loginPage_username">
-      </div>
-      <div data-role="fieldcontain">
-        <label for="loginPage_password">Passwort</label>
-        <input type="password" ng-model="auth.password" id="loginPage_password">
-      </div>
-      <input type="submit" class="login" value="Login" ng-disabled="!auth.loginPossible()">
-    </form>
-  </div>
+    <div data-role="header">
+        <h1>RYLC - Login</h1>
+    </div>
+    <div data-role="content">
+        <div class="error" ngm-if="auth.errorMessage">{{auth.errorMessage}}</div>
+        <form data-ajax="false" ng-submit="auth.login()" name="loginForm">
+            <div data-role="fieldcontain">
+                <label for="loginPage_username">Benutzername</label>
+                <input type="text" ng-model="auth.username" id="loginPage_username">
+            </div>
+            <div data-role="fieldcontain">
+                <label for="loginPage_password">Passwort</label>
+                <input type="password" ng-model="auth.password" id="loginPage_password">
+            </div>
+            <input type="submit" class="login" value="Login" ng-disabled="!auth.loginPossible()">
+        </form>
+    </div>
 </div>
 
-<div id="welcomePage" data-role="page"
-     ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController"
-     ngm-pagebeforeshow="rental.prefetchMasterData()" ngm-pagebeforehide="rental.clearMessages()">
-  <div data-role="header">
-    <h1 class="greeting">Hallo {{auth.customer().name}}</h1>
-    <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
-  </div>
-  <div data-role="content">
-    <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
-    <div class="success" ngm-if="rental.successMessage">{{rental.successMessage}}</div>
-    <a href="" data-role="button" class="newRental" ngm-click="rental.initRental()">Neue Buchung</a>
-    <a href="#rentalHistoryPage" data-role="button" class="rentalHistory">Buchungen</a>
-    <a href="#profilePage" data-role="button" class="profile">Benutzerprofil</a>
-  </div>
-</div>
-
-<div id="profilePage" data-role="page" ngm-shared-controller="auth:rylc.AuthenticationController">
-  <div data-role="header">
-    <h1>Profil von {{auth.customer().name}}</h1>
-    <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
-    <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
-  </div>
-  <div data-role="content">
-    <div data-role="fieldcontain">
-      <label for="profilePage_username">Benutzername</label>
-      <input type="text" ng-model="auth.username" id="profilePage_username" disabled="disabled">
-    </div>
-    <div data-role="fieldcontain">
-      <label for="profilePage_name">Name</label>
-      <input type="text" ng-model="auth.customer().name" id="profilePage_name" disabled="disabled">
-    </div>
-    <div data-role="fieldcontain">
-      <label for="profilePage_street">Stra&szlig;e</label>
-      <input type="text" ng-model="auth.customer().street" id="profilePage_street" disabled="disabled">
-    </div>
-    <div data-role="fieldcontain">
-      <label for="profilePage_zip">PLZ</label>
-      <input type="text" ng-model="auth.customer().zip" id="profilePage_zip" disabled="disabled">
-    </div>
-    <div data-role="fieldcontain">
-      <label for="profilePage_city">Ort</label>
-      <input type="text" ng-model="auth.customer().city" id="profilePage_city" disabled="disabled">
-    </div>
-    <div data-role="fieldcontain">
-      <label for="profilePage_email">E-Mail</label>
-      <input type="text" ng-model="auth.customer().email" id="profilePage_email" disabled="disabled">
-    </div>
-  </div>
-</div>
-
-<div id="rentalHistoryPage" data-role="page" ng-controller="rylc.RentalHistoryController"
-     ngm-shared-controller="auth:rylc.AuthenticationController"
-     ngm-pagebeforeshow="searchRentals()">
-  <div data-role="header">
-    <h1>Buchungen von {{auth.customer().name}}</h1>
-    <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
-    <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
-  </div>
-  <div data-role="content">
-    <div ngm-if="errorMessage" class="error">{{errorMessage}}</div>
-    <div ngm-if="infoMessage()" class="info">{{infoMessage()}}</div>
-    <ul data-role="listview" id="rentalHistoryPage_list">
-      <li ng-repeat="rental in rentals | paged:{pageSize:5}" class="rental">
-        <h4><span class="manufacturer">{{rental.car.manufacturer}}</span> <span class="description">{{rental.car.description}}</span></h4>
-        <p><span class="startDate">{{rental.hireStartDate | simpleDate}}</span> - <span class="endDate">{{rental.hireEndDate | simpleDate}}</span></p>
-        <p class="ui-li-aside">Total: <span class="totalPrice">{{totalPrice(rental) | currency:"&euro;"}}</span></p>
-      </li>
-      <li ngm-if="rentals | paged:'hasMore'">
-          <a href="#" ngm-click="rentals | paged:'loadMore'">Mehr...</a>
-      </li>
-    </ul>
-  </div>
-</div>
-
-<div id="rental1Page" data-role="page"
-     ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController"
-     ngm-pagebeforehide="rental.clearMessages()">
-  <div data-role="header">
-    <h1>PKW suchen</h1>
-    <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
-    <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
-  </div>
-  <div data-role="content" ng-form name="rentalForm">
-    <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
-    <div data-role="fieldcontain">
-      <label for="rental1Page_city">Ort</label>
-      <select id="rental1Page_city" ng-model="rental.city" ng-options="c.name for c in rental.cities"
-              data-native-menu="true"
-              data-theme="b" class="selectedCity">
-      </select>
-    </div>
-    <div data-role="fieldcontain">
-      <label for="rental1Page_startDate">von</label>
-      <input type="date" id="rental1Page_startDate" class="startDate" ng-model="rental.startDate" ng-required="true">
-    </div>
-    <div data-role="fieldcontain">
-      <label for="rental1Page_endDate">bis</label>
-      <input type="date" id="rental1Page_endDate" class="endDate" ng-model="rental.endDate" ng-required="true">
-    </div>
-    <div data-role="fieldcontain">
-      <label for="rental1Page_maxPrice">max. Preis</label>
-      <input type="number" id="rental1Page_maxPrice" class="maxPrice" ng-model="rental.maxPrice" ng-required="true">
-    </div>
-    <button class="search" ng-disabled="!rentalForm.$valid"
-            ngm-click="rental.searchAvailableCars()"
-            data-role="button">Verf&uuml;gbare Autos ermitteln
-    </button>
-  </div>
-</div>
-
-<div id="rental2Page" data-role="page"
-     ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController"
-     ngm-pagebeforehide="rental.clearMessages()">
-  <div data-role="header">
-    <h1>Autotyp w&auml;hlen</h1>
-    <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
-    <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
-  </div>
-  <div data-role="content">
-    <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
-    <select id="rental2Page_carTypes" ng-model="rental.carType" ng-options="carType for carType in rental.carTypes"
-            data-native-menu="true" data-theme="b" class="selectedCarType">
-    </select>
-    <ul data-role="listview" data-inset="true" id="rental2Page_list">
-      <li ng-repeat="car in rental.availableCars | filter:rental.carType" class="car">
-        <a href="#" ngm-click="rental.selectCar(car)"
-           class="selectCar">
-          <span class="carManufacturer">{{car.manufacturer}}</span> <span
-            class="carDescription">{{car.description}}</span>
-          - <span class="carPrice">{{car.price | currency:"&euro;"}}</span>
-        </a>
-      </li>
-    </ul>
-  </div>
-</div>
-
-<div id="rental3Page" data-role="page"
-     ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController">
-  <div data-role="header">
-    <h1>Best&auml;tigen</h1>
-    <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
-    <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
-  </div>
-  <div data-role="content">
-
-    <h1><span class="carManufacturer">{{rental.car.manufacturer}}</span> <span class="carDescription">{{rental.car.description}}</span>
-    </h1>
-
-    <table>
-      <tr>
-        <td>Art:</td>
-        <td class="carType">{{rental.car.carType}}</td>
-      </tr>
-      <tr>
-        <td>Ort:</td>
-        <td class="city">{{rental.city.name}}</td>
-      </tr>
-      <tr>
-        <td>Preis:</td>
-        <td class="carPrice">{{rental.car.price | currency:"&euro;"}}</td>
-      </tr>
-    </table>
-
-    <h3><span class="startDate">{{rental.startDate | simpleDate}}</span> - <span class="endDate">{{rental.endDate | simpleDate}}</span>
-    </h3>
-
-    <h3>Total: <span class="totalPrice">{{rental.totalPrice() | currency:"&euro;"}}</span></h3>
-
-    <p>
-      <a href="#" class="rentCar"
-         ngm-click="rental.rentCar()"
-         data-role="button">Ausleihen</a>
-    </p>
-  </div>
-</div>
 
 </body>
 </html>

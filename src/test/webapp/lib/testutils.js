@@ -22,6 +22,59 @@ jasmineui.inject(function () {
 
   // -----
 
+  var angularBackendServiceResults = {};
+
+  function angularBackendServiceResult($q, name) {
+    var res = backendServiceResult[name];
+    if (!res) {
+      res = angularBackendServiceResults[name] = $q.defer();
+      if (programmedBackendServiceResults[name]) {
+        programmedBackendServiceResults[name].apply(res);
+      }
+    }
+    return res;
+  }
+
+  function createMockBackendService($q, service) {
+    return jasmine.createSpy(service).andCallFake(function () {
+      return angularBackendServiceResult($q, service).promise;
+    });
+  }
+
+  var programmedBackendServiceResults = {};
+
+  function backendServiceResult(serviceName) {
+    var res = programmedBackendServiceResults[serviceName];
+    if (!res) {
+      res = {
+        resolve:function (data) {
+          this.apply = function (defer) {
+            defer.resolve(data);
+            $("body").scope().$apply();
+          };
+          if (angularBackendServiceResults[serviceName]) {
+            this.apply(angularBackendServiceResults[serviceName]);
+          }
+        },
+        reject:function (data) {
+          this.apply = function (defer) {
+            defer.reject(data);
+            $("body").scope().$apply();
+          };
+          if (angularBackendServiceResults[serviceName]) {
+            this.apply(angularBackendServiceResults[serviceName]);
+          }
+        },
+        clear:function () {
+          delete programmedBackendServiceResults[serviceName];
+          delete angularBackendServiceResults[serviceName];
+          return backendServiceResult(serviceName);
+        }
+      };
+    }
+    return programmedBackendServiceResults[serviceName] = res;
+  }
+
   function mockBackend() {
     var services = ['carTypesBackground',
       'carTypes',
@@ -54,60 +107,8 @@ jasmineui.inject(function () {
     angular.module(["rylc-services"]).factory('backendService', backendServiceFactory);
   }
 
-  function createMockBackendService($q, service) {
-    return jasmine.createSpy(service).andCallFake(function () {
-      return angularBackendServiceResult($q, service).promise;
-    });
-  }
-
-  var angularBackendServiceResults = {};
-  var programmedBackendServiceResults = {};
-
-  function angularBackendServiceResult($q, name) {
-    var res = backendServiceResult[name];
-    if (!res) {
-      res = angularBackendServiceResults[name] = $q.defer();
-      if (programmedBackendServiceResults[name]) {
-        programmedBackendServiceResults[name].apply(res);
-      }
-    }
-    return res;
-  }
-
   function backendService() {
     return $("body").injector().get("backendService");
-  }
-
-  function backendServiceResult(serviceName) {
-    var res = programmedBackendServiceResults[serviceName];
-    if (!res) {
-      res = {
-        resolve:function (data) {
-          this.apply = function (defer) {
-            defer.resolve(data);
-            $("body").scope().$apply();
-          };
-          if (angularBackendServiceResults[serviceName]) {
-            this.apply(angularBackendServiceResults[serviceName]);
-          }
-        },
-        reject:function (data) {
-          this.apply = function (defer) {
-            defer.reject(data);
-            $("body").scope().$apply();
-          };
-          if (angularBackendServiceResults[serviceName]) {
-            this.apply(angularBackendServiceResults[serviceName]);
-          }
-        },
-        clear:function () {
-          delete programmedBackendServiceResults[serviceName];
-          delete angularBackendServiceResults[serviceName];
-          return backendServiceResult(serviceName);
-        }
-      };
-    }
-    return programmedBackendServiceResults[serviceName] = res;
   }
 
   // -----

@@ -3,4 +3,5 @@
 *.iml
 
 # Maven
+build
 target

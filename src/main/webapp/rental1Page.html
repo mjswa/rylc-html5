@@ -1,0 +1,37 @@
+<div id="/rylc-html5/rental1Page.html" data-role="page"
+     ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController"
+     ngm-pagebeforehide="rental.clearMessages()">
+    <div data-role="header">
+        <h1>PKW suchen</h1>
+        <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
+        <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
+    </div>
+    <div data-role="content" ng-form name="rentalForm">
+        <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
+        <div data-role="fieldcontain">
+            <label for="rental1Page_city">Ort</label>
+            <select id="rental1Page_city" ng-model="rental.city" ng-options="c.name for c in rental.cities" data-native-menu="true"
+                    data-theme="b" class="selectedCity">
+                <!--
+                <option ng-repeat="city in rental.cities" class="city" value="{{city.id}}">{{city.name}}</option>
+                -->
+            </select>
+        </div>
+        <div data-role="fieldcontain">
+            <label for="rental1Page_startDate">von</label>
+            <input type="date" id="rental1Page_startDate" class="startDate" ng-model="rental.startDate" ng-required="true">
+        </div>
+        <div data-role="fieldcontain">
+            <label for="rental1Page_endDate">bis</label>
+            <input type="date" id="rental1Page_endDate" class="endDate" ng-model="rental.endDate" ng-required="true">
+        </div>
+        <div data-role="fieldcontain">
+            <label for="rental1Page_maxPrice">max. Preis</label>
+            <input type="number" id="rental1Page_maxPrice" class="maxPrice" ng-model="rental.maxPrice" ng-required="true">
+        </div>
+        <button class="search" ng-disabled="!rentalForm.$valid"
+                ngm-click="rental.searchAvailableCars()"
+                data-role="button">Verf&uuml;gbare Autos ermitteln
+        </button>
+    </div>
+</div>

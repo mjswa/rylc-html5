@@ -1,3 +1,4 @@
+@import "lib/jquery.mobile.css";
 
 /*
 label.ui-input-text {
@@ -26,3 +27,4 @@ input.ng-invalid {
     color: #000000;
     padding:  10px
 }
+

@@ -1,4 +1,4 @@
-describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
+describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', function () {
   var authenticatedCustomer = { id:42, name:"someName" };
 
   beforeLoad(function () {
@@ -24,7 +24,7 @@ describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
       click(".profile");
     });
     runs(function () {
-      expect(activePageId()).toBe('profilePage');
+      expect(activePageId()).toBe('/rylc-html5/profilePage.html');
     });
   });
 
@@ -36,7 +36,7 @@ describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('welcomePage');
+      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
     });
   });
 
@@ -45,7 +45,7 @@ describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
       click(".rentalHistory");
     });
     runs(function () {
-      expect(activePageId()).toBe('rentalHistoryPage');
+      expect(activePageId()).toBe('/rylc-html5/rentalHistoryPage.html');
     });
   });
 
@@ -57,7 +57,7 @@ describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('welcomePage');
+      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
     });
   });
 
@@ -66,7 +66,7 @@ describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
       click(".newRental");
     });
     runs(function () {
-      expect(activePageId()).toBe('rental1Page');
+      expect(activePageId()).toBe('/rylc-html5/rental1Page.html');
     });
   });
 
@@ -78,7 +78,7 @@ describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('welcomePage');
+      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
     });
   });
 });

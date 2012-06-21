@@ -1,0 +1,37 @@
+<div id="/rylc-html5/rental3Page.html" data-role="page"
+     ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController">
+    <div data-role="header">
+        <h1>Best&auml;tigen</h1>
+        <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
+        <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
+    </div>
+    <div data-role="content">
+
+        <h1><span class="carManufacturer">{{rental.car.manufacturer}}</span> <span class="carDescription">{{rental.car.description}}</span></h1>
+
+        <table>
+            <tr>
+                <td>Art:</td>
+                <td class="carType">{{rental.car.carType}}</td>
+            </tr>
+            <tr>
+                <td>Ort:</td>
+                <td class="city">{{rental.city.name}}</td>
+            </tr>
+            <tr>
+                <td>Preis:</td>
+                <td class="carPrice">{{rental.car.price | currency:"&euro;"}}</td>
+            </tr>
+        </table>
+
+        <h3><span class="startDate">{{rental.startDate | simpleDate}}</span> - <span class="endDate">{{rental.endDate | simpleDate}}</span></h3>
+
+        <h3>Total: <span class="totalPrice">{{rental.totalPrice() | currency:"&euro;"}}</span></h3>
+
+        <p>
+            <a href="#" class="rentCar"
+               ngm-click="rental.rentCar()"
+               data-role="button">Ausleihen</a>
+        </p>
+    </div>
+</div>

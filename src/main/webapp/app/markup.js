@@ -1,4 +1,4 @@
-(function (angular) {
+define(function () {
 
   function simpleDateFilterFactory(utilsService) {
     return utilsService.formatSimpleDate;
@@ -28,10 +28,11 @@
       }
     }
   }
+
   dateInputDirectiveFactory.$inject = ["utilsService"];
 
   var module = angular.module("rylc-markup", ["rylc-services"]);
   module.filter("simpleDate", simpleDateFilterFactory);
   module.directive("input", dateInputDirectiveFactory);
 
-})(angular);
+});

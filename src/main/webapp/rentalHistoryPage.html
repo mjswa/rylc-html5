@@ -1,0 +1,23 @@
+<div id="/rylc-html5/rentalHistoryPage.html" data-role="page" ng-controller="rylc.RentalHistoryController"
+     ngm-shared-controller="auth:rylc.AuthenticationController"
+     ngm-pagebeforeshow="searchRentals()">
+    <div data-role="header">
+        <h1>Buchungen von {{auth.customer().name}}</h1>
+        <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
+        <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
+    </div>
+    <div data-role="content">
+        <div ngm-if="errorMessage" class="error">{{errorMessage}}</div>
+        <div ngm-if="infoMessage()" class="info">{{infoMessage()}}</div>
+        <ul data-role="listview" id="rentalHistoryPage_list">
+            <li ng-repeat="rental in rentals | paged:{pageSize:5}" class="rental">
+                <h4><span class="manufacturer">{{rental.car.manufacturer}}</span> <span class="description">{{rental.car.description}}</span></h4>
+                <p><span class="startDate">{{rental.hireStartDate | simpleDate}}</span> - <span class="endDate">{{rental.hireEndDate | simpleDate}}</span></p>
+                <p class="ui-li-aside">Total: <span class="totalPrice">{{totalPrice(rental) | currency:"&euro;"}}</span></p>
+            </li>
+            <li ngm-if="rentals | paged:'hasMore'">
+                <a href="#" ngm-click="rentals | paged:'loadMore'">Mehr...</a>
+            </li>
+        </ul>
+    </div>
+</div>

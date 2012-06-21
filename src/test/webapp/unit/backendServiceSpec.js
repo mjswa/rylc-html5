@@ -1,9 +1,11 @@
 describe('backendService', function () {
   var backendBaseUri = '/rylc-html5/api';
+  var resourceCall, resourceDeferred;
   var $httpDefer, $rootScope, $waitDialog, $http, backendService, authenticationHeader, $q;
 
   beforeEach(function () {
     module("rylc-services", function ($provide) {
+
       $provide.factory('$http', function ($q) {
         $http = jasmine.createSpy();
         $httpDefer = $q.defer();
@@ -18,7 +20,6 @@ describe('backendService', function () {
         return $waitDialog;
       });
     });
-
     inject(["$rootScope", "backendService", "$q", function (_$rootScope, _backendService, _$q) {
       $rootScope = _$rootScope;
       backendService = _backendService;
@@ -50,7 +51,9 @@ describe('backendService', function () {
       result = data;
     });
     expect(result).toBeUndefined();
+
     resolveHttp({data:expectedResult});
+
     expect(result).toBe(expectedResult);
   }
 
@@ -66,8 +69,11 @@ describe('backendService', function () {
       result = data;
     });
     expect(result).toBeUndefined();
+
     rejectHttp({status:errorCode});
+
     expect(result).toBe(errorMessage);
+
   }
 
   function expectPromiseToShowWaitDialogForSuccess(promise) {
@@ -121,8 +127,8 @@ describe('backendService', function () {
       expect(result1).toBe(result2);
       expect($http.callCount).toBe(1);
     });
-  });
 
+  });
   describe('carTypes', function () {
     it('should call $http with the the correct params', function () {
       backendService.carTypes();
@@ -176,6 +182,7 @@ describe('backendService', function () {
       expect(result1).toBe(result2);
       expect($http.callCount).toBe(1);
     });
+
   });
 
   describe('citiesBackground', function () {
@@ -194,6 +201,7 @@ describe('backendService', function () {
       backendService.citiesBackground();
       expect($waitDialog.show).not.toHaveBeenCalled();
     });
+
 
     it('should forward the result of $http as result', function () {
       expectPromiseToUnpackResult(backendService.citiesBackground());
@@ -216,8 +224,8 @@ describe('backendService', function () {
       expect($http.callCount).toBe(1);
     });
 
-  });
 
+  });
   describe('cities', function () {
     it('should call $http with the the correct params', function () {
       backendService.cities();
@@ -272,12 +280,16 @@ describe('backendService', function () {
       expect($http.callCount).toBe(1);
     });
 
+
   });
 
+
   describe("rentalsByCustomerId", function () {
+
     it("should call with GET method at URL", function () {
       var customerId = 42;
       backendService.rentalsByCustomerId(customerId);
+
       expect($http).toHaveBeenCalledWith({
         url:backendBaseUri + '/rentals?customerId=' + customerId,
         method:'GET',
@@ -302,12 +314,15 @@ describe('backendService', function () {
     it('should show a wait dialog for error result', function () {
       expectPromiseToShowWaitDialogForError(backendService.rentalsByCustomerId(123));
     });
+
   });
 
   describe("customerByUsername", function () {
+
     it("should call with GET method at URL", function () {
       var username = "someUser";
       backendService.customerByUsername(username);
+
       expect($http).toHaveBeenCalledWith({
         url:backendBaseUri + '/customers?username=' + username,
         method:'GET',
@@ -332,16 +347,18 @@ describe('backendService', function () {
     it('should show a wait dialog for error result', function () {
       expectPromiseToShowWaitDialogForError(backendService.customerByUsername("someUser"));
     });
+
   });
+
 
   describe("availableCars", function () {
     var someCity = 'someCity';
     var startDate = new Date(2010, 1, 1);
     var endDate = new Date(2010, 1, 2);
     var maxPrice = 100;
-
     it("should call with GET method at URL", function () {
       backendService.availableCars(someCity, startDate, endDate, maxPrice);
+
       expect($http).toHaveBeenCalledWith({
         url:backendBaseUri + '/availableCars?cityId=' + someCity + '&startDate=' + startDate.toISOString() + '&endDate=' + endDate.toISOString() + '&maxPrice=' + maxPrice,
         method:'GET',
@@ -366,6 +383,7 @@ describe('backendService', function () {
     it('should show a wait dialog for error result', function () {
       expectPromiseToShowWaitDialogForError(backendService.availableCars(someCity, startDate, endDate, maxPrice));
     });
+
   });
 
   describe("rentCar", function () {
@@ -375,6 +393,7 @@ describe('backendService', function () {
 
     it("should call with POST method at URL", function () {
       backendService.rentCar(someCarId, startDate, endDate);
+
       expect($http).toHaveBeenCalledWith({
         url:backendBaseUri + '/rental',
         method:'POST',
@@ -409,6 +428,7 @@ describe('backendService', function () {
     it('should show a wait dialog for error result', function () {
       expectPromiseToShowWaitDialogForError(backendService.rentCar(someCarId, startDate, endDate));
     });
+
   });
 
   describe('login', function () {
@@ -424,6 +444,7 @@ describe('backendService', function () {
           'Authorization':authenticationHeader
         }
       });
+
     });
   });
 

@@ -1,4 +1,4 @@
-describeUi('rental1', '/rylc-html5/index.html#welcomePage', function () {
+describeUi('rental1', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', function () {
   var authenticatedCustomer = { id: 42, name: "someName" };
   var someCity = {id: 42, name: "City A"};
   var someCities = [someCity, {id: 43, name: "City B"}];
@@ -154,7 +154,7 @@ describeUi('rental1', '/rylc-html5/index.html#welcomePage', function () {
       click(".search");
     });
     runs(function () {
-      expect(activePageId()).toBe('rental2Page');
+      expect(activePageId()).toBe('/rylc-html5/rental2Page.html');
     });
   });
 
@@ -166,13 +166,13 @@ describeUi('rental1', '/rylc-html5/index.html#welcomePage', function () {
       click(".search");
     });
     runs(function () {
-      expect(activePageId()).toBe('rental2Page');
+      expect(activePageId()).toBe('/rylc-html5/rental2Page.html');
     });
     runs(function () {
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('rental1Page');
+      expect(activePageId()).toBe('/rylc-html5/rental1Page.html');
       expect(value(".maxPrice")).toBe("150");
     });
   });

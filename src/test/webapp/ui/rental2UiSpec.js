@@ -1,4 +1,4 @@
-describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
+describeUi('rental2', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', function () {
   var authenticatedCustomer = { id:42, name:"someName" };
   var someCities = [
     {id:10, name:'City A'}
@@ -99,13 +99,13 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
       click(".selectCar");
     });
     runs(function () {
-      expect(activePageId()).toBe('rental3Page');
+      expect(activePageId()).toBe('/rylc-html5/rental3Page.html');
     });
     runs(function () {
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('rental2Page');
+      expect(activePageId()).toBe('/rylc-html5/rental2Page.html');
       expect(value(".selectedCarType")).toBe('1');
     });
   });

@@ -92,4 +92,13 @@ describe("utilsService", function () {
     }));
   });
 
+  describe("builder", function () {
+    it("should call the callback with the given properties and arguments if no setter is called", inject(function (utilsService) {
+      var callback = jasmine.createSpy("callback");
+      var props = { key1:"val1", key2:"val2" };
+      var arg1 = "arg1", arg2 = "arg2";
+      utilsService.builder(props, callback)(arg1, arg2);
+      expect(callback).toHaveBeenCalledWith(props, [arg1, arg2]);
+    }));
+  });
 });
