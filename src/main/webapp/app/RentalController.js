@@ -31,14 +31,14 @@ define(function () {
       }, function (errorMessage) {
         $scope.errorMessage = errorMessage;
       });
-      $navigate('rental1Page.html');
+      $navigate('#rental1Page');
     };
 
     $scope.searchAvailableCars = function () {
       return backendService.availableCars($scope.city.id, $scope.startDate, $scope.endDate, $scope.maxPrice).then(
         function (cars) {
           $scope.availableCars = cars;
-          $navigate("rental2Page.html");
+          $navigate("#rental2Page");
         }, function (errorMessage) {
           $scope.errorMessage = errorMessage;
         });
@@ -54,7 +54,7 @@ define(function () {
 
     $scope.selectCar = function (car) {
       $scope.car = car;
-      $navigate('rental3Page.html');
+      $navigate('#rental3Page');
     };
 
     $scope.rentCar = function () {
@@ -62,10 +62,10 @@ define(function () {
         function (rental) {
           $scope.rental = rental;
           $scope.successMessage = SUCCESS_MESSAGE;
-          $navigate('back:welcomePage.html');
+          $navigate('back:#welcomePage');
         }, function (errorMessage) {
           $scope.errorMessage = errorMessage;
-          $navigate('back:welcomePage.html');
+          $navigate('back:#welcomePage');
         });
     };
   }

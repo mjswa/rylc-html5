@@ -1,4 +1,4 @@
-describeUi('profile', '/rylc-html5/index.html#/rylc-html5/profilePage.html', function () {
+describeUi('profile', '/rylc-html5/index.html#profilePage', function () {
   var authenticatedUsername = "someUsername";
   var authenticatedCustomer = {
     id: 42,

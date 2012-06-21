@@ -1,4 +1,4 @@
-describeUi('rental3', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', function () {
+describeUi('rental3', '/rylc-html5/index.html#welcomePage', function () {
   var authenticatedCustomer = { id:42, name:"someName" };
   var someCity = {id:42, name:'City A'};
   var someCarType = 'CarTypeA';
@@ -70,7 +70,7 @@ describeUi('rental3', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
     });
     runs(function () {
       expect(value('.error')).toBe(someBackendError);
-      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
+      expect(activePageId()).toBe('welcomePage');
     });
   });
 
@@ -81,7 +81,7 @@ describeUi('rental3', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
     });
     runs(function () {
       expect(value('.success')).toBe('Bestellung erfolgreich entgegengenommen.');
-      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
+      expect(activePageId()).toBe('welcomePage');
     });
   });
 });

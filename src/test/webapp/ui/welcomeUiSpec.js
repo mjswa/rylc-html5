@@ -1,4 +1,4 @@
-describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', function () {
+describeUi('welcome', '/rylc-html5/index.html#welcomePage', function () {
   var authenticatedCustomer = { id:42, name:"someName" };
 
   beforeLoad(function () {
@@ -24,7 +24,7 @@ describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
       click(".profile");
     });
     runs(function () {
-      expect(activePageId()).toBe('/rylc-html5/profilePage.html');
+      expect(activePageId()).toBe('profilePage');
     });
   });
 
@@ -36,7 +36,7 @@ describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
+      expect(activePageId()).toBe('welcomePage');
     });
   });
 
@@ -45,7 +45,7 @@ describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
       click(".rentalHistory");
     });
     runs(function () {
-      expect(activePageId()).toBe('/rylc-html5/rentalHistoryPage.html');
+      expect(activePageId()).toBe('rentalHistoryPage');
     });
   });
 
@@ -57,7 +57,7 @@ describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
+      expect(activePageId()).toBe('welcomePage');
     });
   });
 
@@ -66,7 +66,7 @@ describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
       click(".newRental");
     });
     runs(function () {
-      expect(activePageId()).toBe('/rylc-html5/rental1Page.html');
+      expect(activePageId()).toBe('rental1Page');
     });
   });
 
@@ -78,7 +78,7 @@ describeUi('welcome', '/rylc-html5/index.html#/rylc-html5/welcomePage.html', fun
       click('.back');
     });
     runs(function () {
-      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
+      expect(activePageId()).toBe('welcomePage');
     });
   });
 });

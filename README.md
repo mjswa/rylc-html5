@@ -17,3 +17,8 @@ Beispielcode zum Kapitel 7 Backendkommunikation im Buch [Mobile Web-Apps mit Jav
     1.   Jetty starten mittels `mvn jetty:run -Pdevelopment`.
     1.   Zum Ausführen von Unit Tests in Chrome den [Unit Spec Runner](http://localhost:8585/rylc-html5/UnitSpecRunner.html) aufrufen.
     1.   Zum Ausführen von UI Tests in Chrome den [UI Spec Runner](http://localhost:8585/rylc-html5/UiSpecRunner.html) aufrufen.
+*   Manuelles Ausführen der Tests via js-test-driver:
+    1.  mvn jetty:run-war -Pintegration ausführen
+    1.  jstd-server.sh ausführen
+    1.  Einen Browser über die URL http://localhost:9999 mit jstd verbinden
+    1.  Zum Ausführen der Tests jstd-unit.sh bzw. jstd-ui.sh aufrufen.

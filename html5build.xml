@@ -1,0 +1,108 @@
+<project name="html5build" default="buildHtml5">
+
+    <fail message="sourceDir required" unless="sourceDir"/>
+    <fail message="outputDir required" unless="outputDir"/>
+    <fail message="classpath required" unless="classpath"/>
+    <fail message="minify required" unless="minify"/>
+
+    <condition property="minifySet">
+        <equals arg1="${minify}" arg2="true"/>
+    </condition>
+
+    <path id="classpathId">
+        <pathelement path="${classpath}"/>
+    </path>
+
+    <mkdir dir="${outputDir}"/>
+
+    <target name="htmlConcat">
+        <!-- Concat all html files into one file -->
+        <copy file="${sourceDir}/index.html" todir="${outputDir}" overwrite="true"/>
+        <loadresource property="pages">
+            <concat>
+                <fileset dir="${sourceDir}" includes="*.html" excludes="index.html"/>
+                <footer><![CDATA[</body>]]></footer>
+            </concat>
+        </loadresource>
+        <replace file="${outputDir}/index.html" value="${pages}">
+            <replacetoken><![CDATA[</body>]]></replacetoken>
+        </replace>
+    </target>
+
+    <target name="htmlMinify" depends="htmlConcat" if="minifySet">
+        <java classpathref="classpathId" classname="com.googlecode.htmlcompressor.CmdLineCompressor">
+            <arg value="${outputDir}/index.html"/>
+            <arg value="-o"/>
+            <arg value="${outputDir}/index.html"/>
+        </java>
+    </target>
+
+    <target name="jsConcat">
+        <!-- Concat all javascript files into one file -->
+        <java classpathref="classpathId" classname="org.mozilla.javascript.tools.shell.Main">
+            <arg value="${basedir}/misc/requirejs/r.js"/>
+            <arg value="-o"/>
+            <arg value="baseUrl=src/main/webapp"/>
+            <arg value="name=lib/almond"/>
+            <arg value="include=main.js"/>
+            <arg value="out=${outputDir}/main.js"/>
+            <arg value="optimize=none"/>
+        </java>
+    </target>
+
+    <target name="jsMinify" if="minifySet">
+        <!-- Minify javascript -->
+        <java classpathref="classpathId" classname="com.google.javascript.jscomp.CommandLineRunner">
+            <arg value="--js"/>
+            <arg value="${outputDir}/main.js"/>
+            <arg value="--compilation_level"/>
+            <arg value="SIMPLE_OPTIMIZATIONS"/>
+            <arg value="--language_in"/>
+            <arg value="ECMASCRIPT5"/>
+            <arg value="--js_output_file"/>
+            <arg value="${outputDir}/main.min.js"/>
+        </java>
+        <move file="${outputDir}/main.min.js" tofile="${outputDir}/main.js" overwrite="true"/>
+    </target>
+
+    <target name="js" depends="jsConcat, jsMinify">
+        <!-- include generated main.js in index.html -->
+        <replace file="${outputDir}/index.html">
+            <replacetoken><![CDATA[src="lib/require.js"]]></replacetoken>
+            <replacevalue><![CDATA[src="main.js"]]></replacevalue>
+        </replace>
+    </target>
+
+    <target name="cssConcat">
+        <!-- Concat all css includes into one file -->
+        <java classpathref="classpathId" classname="org.mozilla.javascript.tools.shell.Main">
+            <arg value="${basedir}/misc/requirejs/r.js"/>
+            <arg value="-o"/>
+            <arg value="cssIn=src/main/webapp/main.css"/>
+            <arg value="out=${outputDir}/main.css"/>
+        </java>
+    </target>
+
+    <target name="cssMinify" if="minifySet">
+        <java classpathref="classpathId" classname="com.yahoo.platform.yui.compressor.YUICompressor">
+            <arg value="${outputDir}/main.css"/>
+            <arg value="-o"/>
+            <arg value="${outputDir}/main.css"/>
+        </java>
+    </target>
+
+    <target name="copyResources">
+        <copy todir="${outputDir}">
+            <fileset dir="${sourceDir}" includes="*.xml"/>
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </copy>
+        <copy todir="${outputDir}">
+            <fileset dir="${sourceDir}" includes="**/*.gif, **/*.png"/>
+        </copy>
+    </target>
+
+    <target name="buildHtml5" depends="copyResources, htmlConcat, htmlMinify, js, cssConcat, cssMinify"/>
+
+</project>

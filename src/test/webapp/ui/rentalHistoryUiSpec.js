@@ -1,4 +1,4 @@
-describeUi('rentalHistory', '/rylc-html5/index.html#/rylc-html5/rentalHistoryPage.html', function () {
+describeUi('rentalHistory', '/rylc-html5/index.html#rentalHistoryPage', function () {
   var authenticatedUsername = "someUsername";
   var authenticatedCustomer = { id:42 };
 

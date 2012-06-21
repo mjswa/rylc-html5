@@ -1,4 +1,4 @@
-<div id="/rylc-html5/welcomePage.html" data-role="page" ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController"
+<div id="welcomePage" data-role="page" ngm-shared-controller="rental:rylc.RentalController,auth:rylc.AuthenticationController"
      ngm-pagebeforeshow="rental.prefetchMasterData()" ngm-pagebeforehide="rental.clearMessages()">
     <div data-role="header">
         <h1 class="greeting">Hallo {{auth.customer().name}}</h1>
@@ -8,7 +8,7 @@
         <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
         <div class="success" ngm-if="rental.successMessage">{{rental.successMessage}}</div>
         <a href="" data-role="button" class="newRental" ngm-click="rental.initRental()">Neue Buchung</a>
-        <a href="rentalHistoryPage.html" data-role="button" class="rentalHistory">Buchungen</a>
-        <a href="profilePage.html" data-role="button" class="profile">Benutzerprofil</a>
+        <a href="#rentalHistoryPage" data-role="button" class="rentalHistory">Buchungen</a>
+        <a href="#profilePage" data-role="button" class="profile">Benutzerprofil</a>
     </div>
 </div>

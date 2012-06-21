@@ -15,6 +15,8 @@
         <jetty.stopPort>9595</jetty.stopPort>
         <jetty.version>7.6.4.v20120524</jetty.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <html5.minify>false</html5.minify>
+
         <!-- datasource properties -->
         <jdbc.driverClassName>org.h2.Driver</jdbc.driverClassName>
         <jdbc.url>jdbc:h2:mem:rylc-backend</jdbc.url>
@@ -52,77 +54,20 @@
                 <version>1.7</version>
                 <executions>
                     <execution>
-                        <id>package</id>
+                        <id>html5</id>
                         <phase>prepare-package</phase>
                         <configuration>
                             <target>
-                                <property name="sourceDir" value="${project.basedir}/src/main/webapp"/>
-                                <property name="outputDir" value="${project.build.directory}/html5"/>
-                                <mkdir dir="${outputDir}"/>
-
-                                <echo>-------- Building HTML ---------</echo>
-                                <!-- Concat all html files into one file -->
-                                <copy file="${sourceDir}/index.html" todir="${outputDir}" overwrite="true"/>
-                                <loadresource property="pages">
-                                    <concat>
-                                        <fileset dir="${sourceDir}" includes="*.html" excludes="index.html"/>
-                                        <footer><![CDATA[</body>]]></footer>
-                                    </concat>
-                                </loadresource>
-                                <replace file="${outputDir}/index.html" value="${pages}">
-                                    <replacetoken><![CDATA[</body>]]></replacetoken>
-                                </replace>
-                                <!-- Minify html -->
-                                <java classpathref="maven.compile.classpath" classname="com.googlecode.htmlcompressor.CmdLineCompressor">
-                                    <arg value="${outputDir}/index.html"/>
-                                    <arg value="-o"/>
-                                    <arg value="${outputDir}/index.html"/>
-                                </java>
-
-                                <echo>-------- Building JavaScript ---------</echo>
-                                <!-- Concat all javascript files into one file -->
-                                <java classpathref="maven.compile.classpath" classname="org.mozilla.javascript.tools.shell.Main">
-                                    <arg value="${project.basedir}/build/r.js"/>
-                                    <arg value="-o"/>
-                                    <arg value="baseUrl=src/main/webapp"/>
-                                    <arg value="name=lib/almond"/>
-                                    <arg value="include=main.js"/>
-                                    <arg value="out=${outputDir}/main.js"/>
-                                    <arg value="optimize=none"/>
-                                </java>
-                                <!-- Minify javascript -->
-                                <java classpathref="maven.compile.classpath" classname="com.google.javascript.jscomp.CommandLineRunner">
-                                    <arg value="--js"/>
-                                    <arg value="${outputDir}/main.js"/>
-                                    <arg value="--compilation_level"/>
-                                    <arg value="SIMPLE_OPTIMIZATIONS"/>
-                                    <arg value="--language_in"/>
-                                    <arg value="ECMASCRIPT5"/>
-                                    <arg value="--js_output_file"/>
-                                    <arg value="${outputDir}/main.min.js"/>
-                                </java>
-                                <move file="${outputDir}/main.min.js" tofile="${outputDir}/main.js" overwrite="true"/>
-                                <!-- include in index.html -->
-                                <replace file="${outputDir}/index.html">
-                                    <replacetoken><![CDATA[src="lib/require.js"]]></replacetoken>
-                                    <replacevalue><![CDATA[src="main.js"]]></replacevalue>
-                                </replace>
-
-                                <echo>-------- Building CSS ---------</echo>
-                                <!-- Concat all css includes into one file -->
-                                <java classpathref="maven.compile.classpath" classname="org.mozilla.javascript.tools.shell.Main">
-                                    <arg value="${project.basedir}/build/r.js"/>
-                                    <arg value="-o"/>
-                                    <arg value="cssIn=src/main/webapp/main.css"/>
-                                    <arg value="out=${outputDir}/main.css"/>
-                                </java>
-                                <!-- Minify css -->
-                                <java classpathref="maven.compile.classpath" classname="com.yahoo.platform.yui.compressor.YUICompressor">
-                                    <arg value="${outputDir}/main.css"/>
-                                    <arg value="-o"/>
-                                    <arg value="${outputDir}/main.css"/>
-                                </java>
-
+                                <property name="classpath" refid="maven.compile.classpath"/>
+                                <ant antfile="html5build.xml" target="buildHtml5">
+                                    <property name="sourceDir" value="${project.basedir}/src/main/webapp"/>
+                                    <property name="outputDir" value="${basedir}/target/html5"/>
+                                    <property name="classpath" value="${classpath}"/>
+                                    <property name="minify" value="${html5.minify}"/>
+                                </ant>
+                                <zip destfile="${basedir}/target/html5.zip"
+                                     basedir="${basedir}/target/html5"/>
+                                <attachartifact file="${basedir}/target/html5.zip" classifier="html5" type="zip"/>
                             </target>
                         </configuration>
                         <goals>
@@ -132,12 +77,13 @@
                 </executions>
             </plugin>
 
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.1.1</version>
                 <configuration>
-                    <warSourceIncludes>**/*.xml, **/*.gif, **/*.png</warSourceIncludes>
+                    <warSourceIncludes>**/*.xml, **/cordova*.js</warSourceIncludes>
                     <webResources>
                         <resource>
                             <directory>target/html5</directory>
@@ -213,6 +159,8 @@
                         <groupId>org.mortbay.jetty</groupId>
                         <artifactId>jetty-maven-plugin</artifactId>
                         <configuration>
+                            <stopKey>STOPJETTY</stopKey>
+                            <stopPort>${jetty.stopPort}</stopPort>
                             <webAppConfig>
                                 <resourceBases>
                                     <resourceBase>${basedir}/src/main/webapp</resourceBase>

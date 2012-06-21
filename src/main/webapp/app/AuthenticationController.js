@@ -3,7 +3,7 @@ define(function () {
 
     $scope.login = function () {
       return backendService.login($scope.username, $scope.password).then(function () {
-        $navigate('welcomePage.html');
+        $navigate('#welcomePage');
       }, function (errorMessage) {
         $scope.errorMessage = errorMessage;
       });

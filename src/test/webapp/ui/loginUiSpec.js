@@ -48,7 +48,7 @@ describeUi('login', '/rylc-html5/index.html', function () {
     });
     runs(function () {
       expect(backendService().login).toHaveBeenCalledWith(someUsername, somePassword);
-      expect(activePageId()).toBe('/rylc-html5/welcomePage.html');
+      expect(activePageId()).toBe('welcomePage');
     });
   });
 
