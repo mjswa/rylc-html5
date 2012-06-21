@@ -14,6 +14,6 @@ Beispielcode zum Kapitel 7 Backendkommunikation im Buch [Mobile Web-Apps mit Jav
     Alternativ kann die Property `browser` in `pom.xml` angepasst und dort der gewünschte Befehl zum Starten von Chrome
     eingetragen werden.
 *   Manuelles Starten und Ausführen der Tests:
-    1.   Jetty starten mittels `mvn jetty:run`.
-    1.   Zum Ausführen von Unit Tests in Chrome den [Unit Spec Runner](http://localhost:8585/rylc-services/UnitSpecRunner.html) aufrufen.
-    1.   Zum Ausführen von UI Tests in Chrome den [UI Spec Runner](http://localhost:8585/rylc-services/UiSpecRunner.html) aufrufen.
+    1.   Jetty starten mittels `mvn jetty:run -Pdevelopment`.
+    1.   Zum Ausführen von Unit Tests in Chrome den [Unit Spec Runner](http://localhost:8585/rylc-html5/UnitSpecRunner.html) aufrufen.
+    1.   Zum Ausführen von UI Tests in Chrome den [UI Spec Runner](http://localhost:8585/rylc-html5/UiSpecRunner.html) aufrufen.
