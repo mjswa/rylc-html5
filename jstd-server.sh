@@ -1,2 +1,2 @@
 #!/bin/sh
-mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass=com.google.jstestdriver.JsTestDriver -Dexec.args="--port 9876 --runnerMode INFO"
+java -jar misc/JsTestDriver-1.3.2.jar --port 9876 --runnerMode INFO
