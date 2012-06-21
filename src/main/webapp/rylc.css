@@ -1,0 +1,28 @@
+
+/*
+label.ui-input-text {
+    vertical-align: middle;
+}
+*/
+
+.error {
+    background-color: red;
+    color: white;
+    padding:  10px
+}
+
+input.ng-invalid {
+    border: 2px solid red;
+}
+
+.success {
+    background-color: green;
+    color: white;
+    padding:  10px
+}
+
+.info {
+    background-color: yellow;
+    color: #000000;
+    padding:  10px
+}

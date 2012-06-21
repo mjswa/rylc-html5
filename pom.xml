@@ -1,0 +1,153 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.opitzconsulting.mjswa.rylc</groupId>
+    <artifactId>rylc-html5</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <properties>
+        <!-- misc -->
+        <browser>chrome</browser>
+        <jetty.contextPath>/${project.artifactId}</jetty.contextPath>
+        <jetty.port>8585</jetty.port>
+        <jetty.stopPort>9595</jetty.stopPort>
+        <jetty.version>7.6.4.v20120524</jetty.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- datasource properties -->
+        <jdbc.driverClassName>org.h2.Driver</jdbc.driverClassName>
+        <jdbc.url>jdbc:h2:mem:rylc-backend</jdbc.url>
+        <jdbc.username>rylc</jdbc.username>
+        <jdbc.password>rylc</jdbc.password>
+    </properties>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <scanIntervalSeconds>5</scanIntervalSeconds>
+                    <stopKey>STOPJETTY</stopKey>
+                    <stopPort>${jetty.stopPort}</stopPort>
+                    <connectors>
+                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                            <port>${jetty.port}</port>
+                            <maxIdleTime>60000</maxIdleTime>
+                        </connector>
+                    </connectors>
+                    <webAppConfig>
+                        <contextPath>${jetty.contextPath}</contextPath>
+                        <defaultsDescriptor>${basedir}/misc/jetty-webapp/webdefault.xml</defaultsDescriptor>
+                        <resourceBases>
+                            <resourceBase>${basedir}/src/main/webapp</resourceBase>
+                            <resourceBase>${basedir}/src/test/webapp</resourceBase>
+                        </resourceBases>
+                    </webAppConfig>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>rylc-backend-jar</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.jstd-maven-plugin</groupId>
+            <artifactId>jstd-maven-plugin</artifactId>
+            <version>1.3.2.5</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jstd-maven-plugin</id>
+            <name>JsTestDriver Maven Plugin Repository</name>
+            <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jstd-maven-plugin</id>
+            <name>JsTestDriver Maven Plugin Repository</name>
+            <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.jstd-maven-plugin</groupId>
+                        <artifactId>jstd-maven-plugin</artifactId>
+                        <version>1.3.2.5</version>
+                        <configuration>
+                            <browser>${browser}</browser>
+                            <port>9876</port>
+                            <reset>true</reset>
+                            <runnerMode>INFO</runnerMode>
+                            <testOutput>${project.build.directory}/jstd-reports</testOutput>
+                            <tests>all</tests>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>run-unit-tests</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <config>jstd-unit.conf</config>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-integration-tests</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <config>jstd-ui.conf</config>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>start-jetty</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <scanIntervalSeconds>0</scanIntervalSeconds>
+                                    <daemon>true</daemon>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-jetty</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
