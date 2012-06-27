@@ -4,15 +4,13 @@
  */
 (function ($) {
   $.mobile.originalLoadPage = $.mobile.loadPage;
-  var embeddedRegex = /(#\w+)/;
-  var path = $.mobile.path;
   $.mobile.loadPage = function (url, options) {
     var match = url.match(/#(\w+)/);
     var pageId = match && match[1];
     if (pageId && !document.getElementById(pageId)) {
       url = pageId+".html";
     }
-    return $.mobile.originalLoadPage.call(this, url, options);
+    return $.mobile.originalLoadPage(url, options);
   };
 })(window.jQuery);
 
