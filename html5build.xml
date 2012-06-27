@@ -31,36 +31,28 @@
 
     <target name="htmlMinify" depends="htmlConcat" if="minifySet">
         <java classpathref="classpathId" classname="com.googlecode.htmlcompressor.CmdLineCompressor">
-            <arg value="${outputDir}/index.html"/>
-            <arg value="-o"/>
-            <arg value="${outputDir}/index.html"/>
+            <arg line="${outputDir}/index.html"/>
+            <arg line="-o ${outputDir}/index.html"/>
         </java>
     </target>
 
     <target name="jsConcat">
         <!-- Concat all javascript files into one file -->
         <java classpathref="classpathId" classname="org.mozilla.javascript.tools.shell.Main">
-            <arg value="${basedir}/misc/requirejs/r.js"/>
-            <arg value="-o"/>
-            <arg value="baseUrl=src/main/webapp"/>
-            <arg value="name=lib/almond"/>
-            <arg value="include=main.js"/>
-            <arg value="out=${outputDir}/main.js"/>
-            <arg value="optimize=none"/>
+            <arg line="${basedir}/misc/requirejs/r.js -o"/>
+            <arg line="baseUrl=src/main/webapp name=lib/almond"/>
+            <arg line="include=main.js out=${outputDir}/main.js"/>
+            <arg line="optimize=none"/>
         </java>
     </target>
 
     <target name="jsMinify" if="minifySet">
         <!-- Minify javascript -->
         <java classpathref="classpathId" classname="com.google.javascript.jscomp.CommandLineRunner">
-            <arg value="--js"/>
-            <arg value="${outputDir}/main.js"/>
-            <arg value="--compilation_level"/>
-            <arg value="SIMPLE_OPTIMIZATIONS"/>
-            <arg value="--language_in"/>
-            <arg value="ECMASCRIPT5"/>
-            <arg value="--js_output_file"/>
-            <arg value="${outputDir}/main.min.js"/>
+            <arg line="--js ${outputDir}/main.js"/>
+            <arg line="--compilation_level SIMPLE_OPTIMIZATIONS"/>
+            <arg line="--language_in ECMASCRIPT5"/>
+            <arg line="--js_output_file ${outputDir}/main.min.js"/>
         </java>
         <move file="${outputDir}/main.min.js" tofile="${outputDir}/main.js" overwrite="true"/>
     </target>
@@ -76,18 +68,16 @@
     <target name="cssConcat">
         <!-- Concat all css includes into one file -->
         <java classpathref="classpathId" classname="org.mozilla.javascript.tools.shell.Main">
-            <arg value="${basedir}/misc/requirejs/r.js"/>
-            <arg value="-o"/>
-            <arg value="cssIn=src/main/webapp/main.css"/>
-            <arg value="out=${outputDir}/main.css"/>
+            <arg line="${basedir}/misc/requirejs/r.js -o"/>
+            <arg line="cssIn=src/main/webapp/main.css"/>
+            <arg line="out=${outputDir}/main.css"/>
         </java>
     </target>
 
     <target name="cssMinify" if="minifySet">
         <java classpathref="classpathId" classname="com.yahoo.platform.yui.compressor.YUICompressor">
-            <arg value="${outputDir}/main.css"/>
-            <arg value="-o"/>
-            <arg value="${outputDir}/main.css"/>
+            <arg line="${outputDir}/main.css"/>
+            <arg line="-o ${outputDir}/main.css"/>
         </java>
     </target>
 
