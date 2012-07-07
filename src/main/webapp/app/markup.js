@@ -1,4 +1,4 @@
-define(function () {
+define(['angular'], function (angular) {
 
   function simpleDateFilterFactory(utilsService) {
     return utilsService.formatSimpleDate;

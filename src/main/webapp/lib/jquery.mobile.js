@@ -3577,7 +3577,7 @@ $.mobile.transitionFallbacks = {};
 
 			//if there's a data-rel=back attr, go back in history
 			if( $link.is( ":jqmData(rel='back')" ) ) {
-				window.history.back();
+                window.history.back();
 				return false;
 			}
 

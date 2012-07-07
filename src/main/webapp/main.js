@@ -1,16 +1,36 @@
-define([
-  // Patches
-  "lib/order!lib/JSONParseDate.js",
+require.config({
+  paths:{
+    'jquery':'lib/jquery',
+    'angular':'lib/angular',
+    'jquery.mobile':'lib/jquery.mobile'
+  },
+  shim:{
+    'lib/Base64':{exports:'Base64'},
+    'angular':{ deps:['jquery'],exports:'angular' }
+  }
+});
+
+function tryHoldReady() {
+  if (!tryHoldReady.executed && window.jQuery) {
+    window.jQuery.holdReady(true);
+    tryHoldReady.executed = true;
+  }
+}
+tryHoldReady();
+require.onResourceLoad = tryHoldReady;
+
+require([
+  "jquery",
   // Libraries
-  "lib/order!lib/Base64.js",
-  "lib/order!lib/jquery.js",
-  "lib/order!lib/jquery.mobile.js",
-  "lib/order!lib/jqmExternalAsEmbeddedPages.js",
-  "lib/order!lib/angular.js",
-  "lib/order!lib/jquery-mobile-angular-adapter.js",
+  "lib/jqmExternalAsEmbeddedPages",
+  "lib/JSONParseDate",
+  "lib/jquery-mobile-angular-adapter",
   // Application
-  "lib/order!app/services",
-  "lib/order!app/controllers",
-  "lib/order!app/markup",
-  "lib/order!app/application"
-]);
+  "app/services",
+  "app/controllers",
+  "app/markup",
+  "app/application"
+], function (jquery) {
+  jquery.holdReady(false);
+});
+

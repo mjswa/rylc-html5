@@ -41,8 +41,8 @@
         <java classpathref="classpathId" classname="org.mozilla.javascript.tools.shell.Main">
             <arg line="${basedir}/misc/requirejs/r.js -o"/>
             <arg line="baseUrl=src/main/webapp name=lib/almond"/>
-            <arg line="include=main.js out=${outputDir}/main.js"/>
-            <arg line="optimize=none"/>
+            <arg line="include=main mainConfigFile=src/main/webapp/main.js"/>
+            <arg line="out=${outputDir}/main.js waitSeconds=60 optimize=none"/>
         </java>
     </target>
 

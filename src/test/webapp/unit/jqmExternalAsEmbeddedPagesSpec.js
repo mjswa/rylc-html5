@@ -34,6 +34,11 @@ describe('jqmExternalAsEmbeddedPages', function () {
       expect($.mobile.originalLoadPage).toHaveBeenCalledWith("#somePage", someOptions);
     });
 
+    it("should load embedded pages that are already in the dom but were loaded as external pages before as external pages again", function () {
+      container.append('<div id="somePage" data-external-page="true"></div>');
+      $.mobile.loadPage("#somePage", someOptions);
+      expect($.mobile.originalLoadPage).toHaveBeenCalledWith("somePage.html", someOptions);
+    });
   });
 
   describe("pages in the hash of a page url", function () {
@@ -54,5 +59,10 @@ describe('jqmExternalAsEmbeddedPages', function () {
       expect($.mobile.originalLoadPage).toHaveBeenCalledWith("index.html#somePage", someOptions);
     });
 
+    it("should load embedded pages that are already in the dom but were loaded as external pages before as external pages again", function () {
+      container.append('<div id="somePage" data-external-page="true"></div>');
+      $.mobile.loadPage("index.html#somePage", someOptions);
+      expect($.mobile.originalLoadPage).toHaveBeenCalledWith("somePage.html", someOptions);
+    });
   });
 });

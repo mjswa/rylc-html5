@@ -1,4 +1,4 @@
-define(function () {
+define(['lib/Base64'], function (Base64) {
   function backendServiceFactory($http, $q, $waitDialog) {
     var defaultErrorCodeMessageMapping = {
       401:'Zugriff verweigert.',
