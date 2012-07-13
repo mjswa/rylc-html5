@@ -1,5 +1,5 @@
 /**
- * Jasmine-Ui v1.0.1-SNAPSHOT
+ * Jasmine-Ui v1.0.1
  * http://github.com/tigbro/jasmine-ui
  *
  * Copyright 2011, Tobias Bosch (OPITZ CONSULTING GmbH)
@@ -206,6 +206,21 @@ if (!window.jasmine) {
      */
     jasmine.any = function(clazz) {
         return new jasmine.Matchers.Any(clazz);
+    };
+
+    /**
+     * Returns a matchable subset of a JSON object. For use in expectations when you don't care about all of the
+     * attributes on the object.
+     *
+     * @example
+     * // don't care about any other attributes than foo.
+     * expect(mySpy).toHaveBeenCalledWith(jasmine.objectContaining({foo: "bar"});
+     *
+     * @param sample {Object} sample
+     * @returns matchable object for the sample
+     */
+    jasmine.objectContaining = function (sample) {
+        return new jasmine.Matchers.ObjectContaining(sample);
     };
 
     /**
@@ -926,11 +941,19 @@ if (!window.jasmine) {
             return a.getTime() == b.getTime();
         }
 
-        if (a instanceof jasmine.Matchers.Any) {
+        if (a.jasmineMatches) {
+            return a.jasmineMatches(b);
+        }
+
+        if (b.jasmineMatches) {
+            return b.jasmineMatches(a);
+        }
+
+        if (a instanceof jasmine.Matchers.ObjectContaining) {
             return a.matches(b);
         }
 
-        if (b instanceof jasmine.Matchers.Any) {
+        if (b instanceof jasmine.Matchers.ObjectContaining) {
             return b.matches(a);
         }
 
@@ -1224,7 +1247,7 @@ if (!window.jasmine) {
     /**
      * toNotEqual: compares the actual to the expected using the ! of jasmine.Matchers.toEqual
      * @param expected
-     * @deprecated as of 1.0. Use not.toNotEqual() instead.
+     * @deprecated as of 1.0. Use not.toEqual() instead.
      */
     jasmine.Matchers.prototype.toNotEqual = function(expected) {
         return !this.env.equals_(this.actual, expected);
@@ -1397,7 +1420,7 @@ if (!window.jasmine) {
      * Matcher that checks that the expected item is NOT an element in the actual Array.
      *
      * @param {Object} expected
-     * @deprecated as of 1.0. Use not.toNotContain() instead.
+     * @deprecated as of 1.0. Use not.toContain() instead.
      */
     jasmine.Matchers.prototype.toNotContain = function(expected) {
         return !this.env.contains_(this.actual, expected);
@@ -1465,7 +1488,7 @@ if (!window.jasmine) {
         this.expectedClass = expectedClass;
     };
 
-    jasmine.Matchers.Any.prototype.matches = function(other) {
+    jasmine.Matchers.Any.prototype.jasmineMatches = function(other) {
         if (this.expectedClass == String) {
             return typeof other == 'string' || other instanceof String;
         }
@@ -1485,8 +1508,220 @@ if (!window.jasmine) {
         return other instanceof this.expectedClass;
     };
 
-    jasmine.Matchers.Any.prototype.toString = function() {
+    jasmine.Matchers.Any.prototype.jasmineToString = function() {
         return '<jasmine.any(' + this.expectedClass + ')>';
+    };
+
+    jasmine.Matchers.ObjectContaining = function (sample) {
+        this.sample = sample;
+    };
+
+    jasmine.Matchers.ObjectContaining.prototype.jasmineMatches = function(other, mismatchKeys, mismatchValues) {
+        mismatchKeys = mismatchKeys || [];
+        mismatchValues = mismatchValues || [];
+
+        var env = jasmine.getEnv();
+
+        var hasKey = function(obj, keyName) {
+            return obj != null && obj[keyName] !== jasmine.undefined;
+        };
+
+        for (var property in this.sample) {
+            if (!hasKey(other, property) && hasKey(this.sample, property)) {
+                mismatchKeys.push("expected has key '" + property + "', but missing from actual.");
+            }
+            else if (!env.equals_(this.sample[property], other[property], mismatchKeys, mismatchValues)) {
+                mismatchValues.push("'" + property + "' was '" + (other[property] ? jasmine.util.htmlEscape(other[property].toString()) : other[property]) + "' in expected, but was '" + (this.sample[property] ? jasmine.util.htmlEscape(this.sample[property].toString()) : this.sample[property]) + "' in actual.");
+            }
+        }
+
+        return (mismatchKeys.length === 0 && mismatchValues.length === 0);
+    };
+
+    jasmine.Matchers.ObjectContaining.prototype.jasmineToString = function () {
+        return "<jasmine.objectContaining(" + jasmine.pp(this.sample) + ")>";
+    };
+// Mock setTimeout, clearTimeout
+// Contributed by Pivotal Computer Systems, www.pivotalsf.com
+
+    jasmine.FakeTimer = function() {
+        this.reset();
+
+        var self = this;
+        self.setTimeout = function(funcToCall, millis) {
+            self.timeoutsMade++;
+            self.scheduleFunction(self.timeoutsMade, funcToCall, millis, false);
+            return self.timeoutsMade;
+        };
+
+        self.setInterval = function(funcToCall, millis) {
+            self.timeoutsMade++;
+            self.scheduleFunction(self.timeoutsMade, funcToCall, millis, true);
+            return self.timeoutsMade;
+        };
+
+        self.clearTimeout = function(timeoutKey) {
+            self.scheduledFunctions[timeoutKey] = jasmine.undefined;
+        };
+
+        self.clearInterval = function(timeoutKey) {
+            self.scheduledFunctions[timeoutKey] = jasmine.undefined;
+        };
+
+    };
+
+    jasmine.FakeTimer.prototype.reset = function() {
+        this.timeoutsMade = 0;
+        this.scheduledFunctions = {};
+        this.nowMillis = 0;
+    };
+
+    jasmine.FakeTimer.prototype.tick = function(millis) {
+        var oldMillis = this.nowMillis;
+        var newMillis = oldMillis + millis;
+        this.runFunctionsWithinRange(oldMillis, newMillis);
+        this.nowMillis = newMillis;
+    };
+
+    jasmine.FakeTimer.prototype.runFunctionsWithinRange = function(oldMillis, nowMillis) {
+        var scheduledFunc;
+        var funcsToRun = [];
+        for (var timeoutKey in this.scheduledFunctions) {
+            scheduledFunc = this.scheduledFunctions[timeoutKey];
+            if (scheduledFunc != jasmine.undefined &&
+                scheduledFunc.runAtMillis >= oldMillis &&
+                scheduledFunc.runAtMillis <= nowMillis) {
+                funcsToRun.push(scheduledFunc);
+                this.scheduledFunctions[timeoutKey] = jasmine.undefined;
+            }
+        }
+
+        if (funcsToRun.length > 0) {
+            funcsToRun.sort(function(a, b) {
+                return a.runAtMillis - b.runAtMillis;
+            });
+            for (var i = 0; i < funcsToRun.length; ++i) {
+                try {
+                    var funcToRun = funcsToRun[i];
+                    this.nowMillis = funcToRun.runAtMillis;
+                    funcToRun.funcToCall();
+                    if (funcToRun.recurring) {
+                        this.scheduleFunction(funcToRun.timeoutKey,
+                            funcToRun.funcToCall,
+                            funcToRun.millis,
+                            true);
+                    }
+                } catch(e) {
+                }
+            }
+            this.runFunctionsWithinRange(oldMillis, nowMillis);
+        }
+    };
+
+    jasmine.FakeTimer.prototype.scheduleFunction = function(timeoutKey, funcToCall, millis, recurring) {
+        this.scheduledFunctions[timeoutKey] = {
+            runAtMillis: this.nowMillis + millis,
+            funcToCall: funcToCall,
+            recurring: recurring,
+            timeoutKey: timeoutKey,
+            millis: millis
+        };
+    };
+
+    /**
+     * @namespace
+     */
+    jasmine.Clock = {
+        defaultFakeTimer: new jasmine.FakeTimer(),
+
+        reset: function() {
+            jasmine.Clock.assertInstalled();
+            jasmine.Clock.defaultFakeTimer.reset();
+        },
+
+        tick: function(millis) {
+            jasmine.Clock.assertInstalled();
+            jasmine.Clock.defaultFakeTimer.tick(millis);
+        },
+
+        runFunctionsWithinRange: function(oldMillis, nowMillis) {
+            jasmine.Clock.defaultFakeTimer.runFunctionsWithinRange(oldMillis, nowMillis);
+        },
+
+        scheduleFunction: function(timeoutKey, funcToCall, millis, recurring) {
+            jasmine.Clock.defaultFakeTimer.scheduleFunction(timeoutKey, funcToCall, millis, recurring);
+        },
+
+        useMock: function() {
+            if (!jasmine.Clock.isInstalled()) {
+                var spec = jasmine.getEnv().currentSpec;
+                spec.after(jasmine.Clock.uninstallMock);
+
+                jasmine.Clock.installMock();
+            }
+        },
+
+        installMock: function() {
+            jasmine.Clock.installed = jasmine.Clock.defaultFakeTimer;
+        },
+
+        uninstallMock: function() {
+            jasmine.Clock.assertInstalled();
+            jasmine.Clock.installed = jasmine.Clock.real;
+        },
+
+        real: {
+            setTimeout: jasmine.getGlobal().setTimeout,
+            clearTimeout: jasmine.getGlobal().clearTimeout,
+            setInterval: jasmine.getGlobal().setInterval,
+            clearInterval: jasmine.getGlobal().clearInterval
+        },
+
+        assertInstalled: function() {
+            if (!jasmine.Clock.isInstalled()) {
+                throw new Error("Mock clock is not installed, use jasmine.Clock.useMock()");
+            }
+        },
+
+        isInstalled: function() {
+            return jasmine.Clock.installed == jasmine.Clock.defaultFakeTimer;
+        },
+
+        installed: null
+    };
+    jasmine.Clock.installed = jasmine.Clock.real;
+
+//else for IE support
+    jasmine.getGlobal().setTimeout = function(funcToCall, millis) {
+        if (jasmine.Clock.installed.setTimeout.apply) {
+            return jasmine.Clock.installed.setTimeout.apply(this, arguments);
+        } else {
+            return jasmine.Clock.installed.setTimeout(funcToCall, millis);
+        }
+    };
+
+    jasmine.getGlobal().setInterval = function(funcToCall, millis) {
+        if (jasmine.Clock.installed.setInterval.apply) {
+            return jasmine.Clock.installed.setInterval.apply(this, arguments);
+        } else {
+            return jasmine.Clock.installed.setInterval(funcToCall, millis);
+        }
+    };
+
+    jasmine.getGlobal().clearTimeout = function(timeoutKey) {
+        if (jasmine.Clock.installed.clearTimeout.apply) {
+            return jasmine.Clock.installed.clearTimeout.apply(this, arguments);
+        } else {
+            return jasmine.Clock.installed.clearTimeout(timeoutKey);
+        }
+    };
+
+    jasmine.getGlobal().clearInterval = function(timeoutKey) {
+        if (jasmine.Clock.installed.clearTimeout.apply) {
+            return jasmine.Clock.installed.clearInterval.apply(this, arguments);
+        } else {
+            return jasmine.Clock.installed.clearInterval(timeoutKey);
+        }
     };
 
     /**
@@ -1629,8 +1864,8 @@ if (!window.jasmine) {
                 this.emitScalar('null');
             } else if (value === jasmine.getGlobal()) {
                 this.emitScalar('<global>');
-            } else if (value instanceof jasmine.Matchers.Any) {
-                this.emitScalar(value.toString());
+            } else if (value.jasmineToString) {
+                this.emitScalar(value.jasmineToString());
             } else if (typeof value === 'string') {
                 this.emitString(value);
             } else if (jasmine.isSpy(value)) {
@@ -2297,194 +2532,12 @@ if (!window.jasmine) {
             }, jasmine.WaitsForBlock.TIMEOUT_INCREMENT);
         }
     };
-// Mock setTimeout, clearTimeout
-// Contributed by Pivotal Computer Systems, www.pivotalsf.com
-
-    jasmine.FakeTimer = function() {
-        this.reset();
-
-        var self = this;
-        self.setTimeout = function(funcToCall, millis) {
-            self.timeoutsMade++;
-            self.scheduleFunction(self.timeoutsMade, funcToCall, millis, false);
-            return self.timeoutsMade;
-        };
-
-        self.setInterval = function(funcToCall, millis) {
-            self.timeoutsMade++;
-            self.scheduleFunction(self.timeoutsMade, funcToCall, millis, true);
-            return self.timeoutsMade;
-        };
-
-        self.clearTimeout = function(timeoutKey) {
-            self.scheduledFunctions[timeoutKey] = jasmine.undefined;
-        };
-
-        self.clearInterval = function(timeoutKey) {
-            self.scheduledFunctions[timeoutKey] = jasmine.undefined;
-        };
-
-    };
-
-    jasmine.FakeTimer.prototype.reset = function() {
-        this.timeoutsMade = 0;
-        this.scheduledFunctions = {};
-        this.nowMillis = 0;
-    };
-
-    jasmine.FakeTimer.prototype.tick = function(millis) {
-        var oldMillis = this.nowMillis;
-        var newMillis = oldMillis + millis;
-        this.runFunctionsWithinRange(oldMillis, newMillis);
-        this.nowMillis = newMillis;
-    };
-
-    jasmine.FakeTimer.prototype.runFunctionsWithinRange = function(oldMillis, nowMillis) {
-        var scheduledFunc;
-        var funcsToRun = [];
-        for (var timeoutKey in this.scheduledFunctions) {
-            scheduledFunc = this.scheduledFunctions[timeoutKey];
-            if (scheduledFunc != jasmine.undefined &&
-                scheduledFunc.runAtMillis >= oldMillis &&
-                scheduledFunc.runAtMillis <= nowMillis) {
-                funcsToRun.push(scheduledFunc);
-                this.scheduledFunctions[timeoutKey] = jasmine.undefined;
-            }
-        }
-
-        if (funcsToRun.length > 0) {
-            funcsToRun.sort(function(a, b) {
-                return a.runAtMillis - b.runAtMillis;
-            });
-            for (var i = 0; i < funcsToRun.length; ++i) {
-                try {
-                    var funcToRun = funcsToRun[i];
-                    this.nowMillis = funcToRun.runAtMillis;
-                    funcToRun.funcToCall();
-                    if (funcToRun.recurring) {
-                        this.scheduleFunction(funcToRun.timeoutKey,
-                            funcToRun.funcToCall,
-                            funcToRun.millis,
-                            true);
-                    }
-                } catch(e) {
-                }
-            }
-            this.runFunctionsWithinRange(oldMillis, nowMillis);
-        }
-    };
-
-    jasmine.FakeTimer.prototype.scheduleFunction = function(timeoutKey, funcToCall, millis, recurring) {
-        this.scheduledFunctions[timeoutKey] = {
-            runAtMillis: this.nowMillis + millis,
-            funcToCall: funcToCall,
-            recurring: recurring,
-            timeoutKey: timeoutKey,
-            millis: millis
-        };
-    };
-
-    /**
-     * @namespace
-     */
-    jasmine.Clock = {
-        defaultFakeTimer: new jasmine.FakeTimer(),
-
-        reset: function() {
-            jasmine.Clock.assertInstalled();
-            jasmine.Clock.defaultFakeTimer.reset();
-        },
-
-        tick: function(millis) {
-            jasmine.Clock.assertInstalled();
-            jasmine.Clock.defaultFakeTimer.tick(millis);
-        },
-
-        runFunctionsWithinRange: function(oldMillis, nowMillis) {
-            jasmine.Clock.defaultFakeTimer.runFunctionsWithinRange(oldMillis, nowMillis);
-        },
-
-        scheduleFunction: function(timeoutKey, funcToCall, millis, recurring) {
-            jasmine.Clock.defaultFakeTimer.scheduleFunction(timeoutKey, funcToCall, millis, recurring);
-        },
-
-        useMock: function() {
-            if (!jasmine.Clock.isInstalled()) {
-                var spec = jasmine.getEnv().currentSpec;
-                spec.after(jasmine.Clock.uninstallMock);
-
-                jasmine.Clock.installMock();
-            }
-        },
-
-        installMock: function() {
-            jasmine.Clock.installed = jasmine.Clock.defaultFakeTimer;
-        },
-
-        uninstallMock: function() {
-            jasmine.Clock.assertInstalled();
-            jasmine.Clock.installed = jasmine.Clock.real;
-        },
-
-        real: {
-            setTimeout: jasmine.getGlobal().setTimeout,
-            clearTimeout: jasmine.getGlobal().clearTimeout,
-            setInterval: jasmine.getGlobal().setInterval,
-            clearInterval: jasmine.getGlobal().clearInterval
-        },
-
-        assertInstalled: function() {
-            if (!jasmine.Clock.isInstalled()) {
-                throw new Error("Mock clock is not installed, use jasmine.Clock.useMock()");
-            }
-        },
-
-        isInstalled: function() {
-            return jasmine.Clock.installed == jasmine.Clock.defaultFakeTimer;
-        },
-
-        installed: null
-    };
-    jasmine.Clock.installed = jasmine.Clock.real;
-
-//else for IE support
-    jasmine.getGlobal().setTimeout = function(funcToCall, millis) {
-        if (jasmine.Clock.installed.setTimeout.apply) {
-            return jasmine.Clock.installed.setTimeout.apply(this, arguments);
-        } else {
-            return jasmine.Clock.installed.setTimeout(funcToCall, millis);
-        }
-    };
-
-    jasmine.getGlobal().setInterval = function(funcToCall, millis) {
-        if (jasmine.Clock.installed.setInterval.apply) {
-            return jasmine.Clock.installed.setInterval.apply(this, arguments);
-        } else {
-            return jasmine.Clock.installed.setInterval(funcToCall, millis);
-        }
-    };
-
-    jasmine.getGlobal().clearTimeout = function(timeoutKey) {
-        if (jasmine.Clock.installed.clearTimeout.apply) {
-            return jasmine.Clock.installed.clearTimeout.apply(this, arguments);
-        } else {
-            return jasmine.Clock.installed.clearTimeout(timeoutKey);
-        }
-    };
-
-    jasmine.getGlobal().clearInterval = function(timeoutKey) {
-        if (jasmine.Clock.installed.clearTimeout.apply) {
-            return jasmine.Clock.installed.clearInterval.apply(this, arguments);
-        } else {
-            return jasmine.Clock.installed.clearInterval(timeoutKey);
-        }
-    };
 
     jasmine.version_= {
         "major": 1,
-        "minor": 1,
+        "minor": 2,
         "build": 0,
-        "revision": 1315677058
+        "revision": 1337005947
     };
 
 }
@@ -2492,183 +2545,202 @@ if (window.jstestdriver) {
     /**
      * @fileoverview Jasmine JsTestDriver Adapter.
      * @author misko@hevery.com (Misko Hevery)
-     * @author olmo.maldonado@gmail.com (Olmo Maldonado)
      */
-    (function(){
-
-
-        var Env = function(onTestDone, onComplete){
-            jasmine.Env.call(this);
-
-            this.specFilter = function(spec){
-                if (!this.exclusive) return true;
-                var blocks = spec.queue.blocks, l = blocks.length;
-                for (var i = 0; i < l; i++) if (blocks[i].func.exclusive >= this.exclusive) return true;
-                return false;
-            };
-
-            this.reporter = new Reporter(onTestDone, onComplete);
-        };
-        jasmine.util.inherit(Env, jasmine.Env);
-
-// Here we store:
-// 0: everyone runs
-// 1: run everything under ddescribe
-// 2: run only iits (ignore ddescribe)
-        Env.prototype.exclusive = 0;
-
-
-        Env.prototype.execute = function(){
-            collectMode = false;
-            playback();
-            jasmine.Env.prototype.execute.call(this);
-        };
-
-
-        var Reporter = function(onTestDone, onComplete){
-            this.onTestDone = onTestDone;
-            this.onComplete = onComplete;
-            this.reset();
-        };
-        jasmine.util.inherit(Reporter, jasmine.Reporter);
-
-
-        Reporter.formatStack = function(stack) {
-            var line, lines = (stack || '').split(/\r?\n/), l = lines.length, frames = [];
-            for (var i = 0; i < l; i++){
-                line = lines[i];
-                if (line.match(/\/jasmine[\.-]/)) continue;
-                frames.push(line.replace(/https?:\/\/\w+(:\d+)?\/test\//, '').replace(/^\s*/, '			'));
-            }
-            return frames.join('\n');
-        };
-
-
-        Reporter.prototype.reset = function(){
-            this.specLog = jstestdriver.console.log_ = [];
-        };
-
-
-        Reporter.prototype.log = function(str){
-            this.specLog.push(str);
-        };
-
-
-        Reporter.prototype.reportSpecStarting = function(){
-            this.reset();
-            this.start = +new Date();
-        };
-
-
-        Reporter.prototype.reportSpecResults = function(spec){
-            var elapsed = +new Date() - this.start, results = spec.results();
-
-            if (results.skipped) return;
-
-            var item, state = 'passed', items = results.getItems(), l = items.length, messages = [];
-            for (var i = 0; i < l; i++){
-                item = items[i];
-                if (item.passed()) continue;
-                state = (item.message.indexOf('AssertionError:') != -1) ? 'error' : 'failed';
-                messages.push({
-                    message: item + '',
-                    name: item.trace.name,
-                    stack: Reporter.formatStack(item.trace.stack)
-                });
-            }
-
-            this.onTestDone(new jstestdriver.TestResult(
-                spec.suite.getFullName(),
-                spec.description,
-                state,
-                jstestdriver.angular.toJson(messages),
-                this.specLog.join('\n'),
-                elapsed
-            ));
-        };
-
-
-        Reporter.prototype.reportRunnerResults = function(){
-            this.onComplete();
-        };
-
-
-        var collectMode = true, intercepted = {};
-
-        describe = intercept('describe');
-        beforeEach = intercept('beforeEach');
-        afterEach = intercept('afterEach');
+    (function(window) {
+        var rootDescribes = new Describes(window);
+        rootDescribes.collectMode();
 
         var JASMINE_TYPE = 'jasmine test case';
         TestCase('Jasmine Adapter Tests', null, JASMINE_TYPE);
 
-        jstestdriver.pluginRegistrar.register({
+        var jasminePlugin = {
+            name:'jasmine',
 
-            name: 'jasmine',
+            getTestRunsConfigurationFor: function(testCaseInfos, expressions, testRunsConfiguration) {
+                for (var i = 0; i < testCaseInfos.length; i++) {
+                    if (testCaseInfos[i].getType() == JASMINE_TYPE) {
+                        testRunsConfiguration.push(new jstestdriver.TestRunConfiguration(testCaseInfos[i], []));
+                    }
+                }
+                return false;
+            },
 
-            runTestConfiguration: function(config, onTestDone, onComplete){
-                if (config.getTestCaseInfo().getType() != JASMINE_TYPE) return false;
-                (jasmine.currentEnv_ = new Env(onTestDone, onComplete)).execute();
+            runTestConfiguration: function(testRunConfiguration, onTestDone, onTestRunConfigurationComplete) {
+                if (testRunConfiguration.getTestCaseInfo().getType() != JASMINE_TYPE) return false;
+
+                var jasmineEnv = jasmine.currentEnv_ = new jasmine.Env();
+                rootDescribes.playback();
+                var specLog = jstestdriver.console.log_ = [];
+                var start;
+                jasmineEnv.specFilter = function(spec) {
+                    return rootDescribes.isExclusive(spec);
+                };
+                jasmineEnv.reporter = {
+                    log: function(str) {
+                        specLog.push(str);
+                    },
+
+                    reportRunnerStarting: function(runner) { },
+
+                    reportSpecStarting: function(spec) {
+                        specLog = jstestdriver.console.log_ = [];
+                        start = new Date().getTime();
+                    },
+
+                    reportSpecResults: function(spec) {
+                        var suite = spec.suite;
+                        var results = spec.results();
+                        if (results.skipped) return;
+                        var end = new Date().getTime();
+                        var messages = [];
+                        var resultItems = results.getItems();
+                        var state = 'passed';
+                        for ( var i = 0; i < resultItems.length; i++) {
+                            if (!resultItems[i].passed()) {
+                                state = resultItems[i].message.match(/AssertionError:/) ? 'error' : 'failed';
+                                messages.push({
+                                    message: resultItems[i].toString(),
+                                    name: resultItems[i].trace.name,
+                                    stack: formatStack(resultItems[i].trace.stack)
+                                });
+                            }
+                        }
+                        onTestDone(
+                            new jstestdriver.TestResult(
+                                suite.getFullName(),
+                                spec.description,
+                                state,
+                                jstestdriver.angular.toJson(messages),
+                                specLog.join('\n'),
+                                end - start));
+                    },
+
+                    reportSuiteResults: function(suite) {},
+
+                    reportRunnerResults: function(runner) {
+                        onTestRunConfigurationComplete();
+                    }
+                };
+                jasmineEnv.execute();
                 return true;
             },
 
-            onTestsFinish: function(){
+            onTestsFinish: function() {
                 jasmine.currentEnv_ = null;
+                rootDescribes.collectMode();
+            }
+        };
+        jstestdriver.pluginRegistrar.register(jasminePlugin);
+
+        function formatStack(stack) {
+            var lines = (stack||'').split(/\r?\n/);
+            var frames = [];
+            for (var i = 0; i < lines.length; i++) {
+                if (!lines[i].match(/\/jasmine[\.-]/)) {
+                    frames.push(lines[i].replace(/https?:\/\/\w+(:\d+)?\/test\//, '').replace(/^\s*/, '      '));
+                }
+            }
+            return frames.join('\n');
+        }
+
+        function noop() {}
+        function Describes(window) {
+            var describes = {};
+            var beforeEachs = {};
+            var afterEachs = {};
+            // Here we store:
+            // 0: everyone runs
+            // 1: run everything under ddescribe
+            // 2: run only iits (ignore ddescribe)
+            var exclusive = 0;
+            var collectMode = true;
+            intercept('describe', describes);
+            intercept('xdescribe', describes);
+            intercept('beforeEach', beforeEachs);
+            intercept('afterEach', afterEachs);
+
+            function intercept(functionName, collection) {
+                window[functionName] = function(desc, fn) {
+                    if (collectMode) {
+                        collection[desc] = function() {
+                            jasmine.getEnv()[functionName](desc, fn);
+                        };
+                    } else {
+                        jasmine.getEnv()[functionName](desc, fn);
+                    }
+                };
+            }
+            window.ddescribe = function(name, fn) {
+                if (exclusive < 1) {
+                    exclusive = 1; // run ddescribe only
+                }
+                window.describe(name, function() {
+                    var oldIt = window.it;
+                    window.it = function(name, fn) {
+                        if (fn) fn.exclusive = 1; // run anything under ddescribe
+                        jasmine.getEnv().it(name, fn);
+                    };
+                    try {
+                        fn.call(this);
+                    } finally {
+                        window.it = oldIt;
+                    };
+                });
+            };
+            window.iit = function(name, fn) {
+                exclusive = fn.exclusive = 2; // run only iits
+                jasmine.getEnv().it(name, fn);
+            };
+
+
+            this.collectMode = function() {
                 collectMode = true;
-            }
+                exclusive = 0; // run everything
+            };
+            this.playback = function() {
+                collectMode = false;
+                playback(beforeEachs);
+                playback(afterEachs);
+                playback(describes);
 
-        });
+                function playback(set) {
+                    for ( var name in set) {
+                        set[name]();
+                    }
+                }
+            };
 
-        function intercept(method){
-            var bucket = intercepted[method] = [], method = window[method];
-            return function(desc, fn){
-                if (collectMode) bucket.push(function(){ method(desc, fn); });
-                else method(desc, fn);
+            this.isExclusive = function(spec) {
+                if (exclusive) {
+                    var blocks = spec.queue.blocks;
+                    for ( var i = 0; i < blocks.length; i++) {
+                        if (blocks[i].func.exclusive >= exclusive) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                return true;
             };
         }
 
-        function playback(){
-            for (var method in intercepted){
-                var bucket = intercepted[method];
-                for (var i = 0, l = bucket.length; i < l; i++) bucket[i]();
-            }
-        }
-
-    })();
-
-    var ddescribe = function(name, fn){
-        var env = jasmine.getEnv();
-        if (!env.exclusive) env.exclusive = 1; // run ddescribe only
-        describe(name, function(){
-            var oldIt = it;
-            it = function(name, fn){
-                fn.exclusive = 1; // run anything under ddescribe
-                env.it(name, fn);
-            };
-
-            try {
-                fn.call(this);
-            } finally {
-                it = oldIt;
-            };
-        });
-    };
-
-    var iit = function(name, fn){
-        var env = jasmine.getEnv();
-        env.exclusive = fn.exclusive = 2; // run only iits
-        env.it(name, fn);
-    };
+    })(window);
 
 // Patch Jasmine for proper stack traces
     jasmine.Spec.prototype.fail = function (e) {
-        var result = new jasmine.ExpectationResult({
+        var expectationResult = new jasmine.ExpectationResult({
             passed: false,
             message: e ? jasmine.util.formatException(e) : 'Exception'
         });
-        if(e) result.trace = e;
-        this.results_.addResult(result);
+        // PATCH
+        if (e) {
+            expectationResult.trace = e;
+        }
+        this.results_.addResult(expectationResult);
     };
+
+
+
 }
 /**
  * Simple implementation of AMD require/define assuming all
@@ -3294,53 +3366,125 @@ jasmineui.define('loadListener', ['globals'], function (globals) {
         }
     }
 
-
     function beforeLoadCallback() {
-        /*
-         * When using a script loader,
-         * the document might be ready, but not the modules.
-         */
-        if (scriptLoaderIsReady()) {
-            callBeforeLoadListeners();
+        if (requirejs.isWaiting()) {
+            requirejs.executeBeforeReady(callBeforeLoadListeners);
+        } else if (jquery.isWaiting()) {
+            jquery.executeBeforeReady(callBeforeLoadListeners);
         } else {
-            setScriptLoaderBeforeLoadEvent(callBeforeLoadListeners);
+            callBeforeLoadListeners();
         }
-        return true;
-    }
-
-    /**
-     * Must not be called before the load event of the document!
-     */
-    function scriptLoaderIsReady() {
-        if (globals.require && globals.require.resourcesReady) {
-            return globals.require.resourcesDone;
-        }
-        return true;
-    }
-
-    function setScriptLoaderBeforeLoadEvent(listener) {
-        var oldResourcesReady = globals.require.resourcesReady;
-        globals.require.resourcesReady = function (ready) {
-            if (ready) {
-                listener();
-            }
-            return oldResourcesReady.apply(this, arguments);
-        };
     }
 
     function loaded() {
-        var docReady = document.readyState == 'complete';
-        if (docReady) {
-            return scriptLoaderIsReady();
-        }
-        return docReady;
+        return document.readyState == 'complete' && !requirejs.isWaiting() && !jquery.isWaiting();
     }
+
+    function isEmptyObj(obj, ignoreKey) {
+        for (var x in obj) {
+            if (x!==ignoreKey) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    var jquery = {
+        isWaiting: function() {
+            // Note: We only wait for extra waiting due to calls to holdReady,
+            // not for the normal DOMContentLoaded event handling of jQuery.
+            // Reason: For the normal DOMContentLoaded handling in jQuery we cannot
+            // install an interceptor resp. we already have an interceptor for that DOM event!
+            if (globals.jQuery) {
+                if (globals.jQuery.readyWait>=2) {
+                    return true;
+                }
+                if (globals.jQuery.isReady && globals.jQuery.readyWait >= 1) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        executeBeforeReady: function(callback) {
+            var _holdReady = globals.jQuery.holdReady;
+            globals.jQuery.holdReady = function(hold) {
+                if (hold) {
+                    return _holdReady.apply(this, arguments);
+                }
+                // Note: This is the border that makes isWaiting() false!
+                if (globals.jQuery.readyWait===1 && globals.jQuery.isReady || globals.jQuery.readyWait===2 && !globals.jQuery.isReady) {
+                    callback();
+                }
+                return _holdReady.apply(this, arguments);
+            }
+        }
+    };
+
+    var requirejs = {
+        isWaiting: function(ignoreModId) {
+            if (globals.require && globals.require.s) {
+                var contexts = globals.require.s.contexts;
+                for (var ctxName in contexts) {
+                    if (!isEmptyObj(contexts[ctxName].registry, ignoreModId)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        },
+        executeBeforeReady: function(callback) {
+            var contexts = globals.require.s.contexts;
+            for (var ctxName in contexts) {
+                instrumentRequireJsContext(contexts[ctxName]);
+            }
+
+            function instrumentRequireJsContext(context) {
+                var _execCb = context.execCb;
+                context.execCb = function(modId) {
+                    if (!requirejs.isWaiting(modId)) {
+                        if (jquery.isWaiting()) {
+                            jquery.executeBeforeReady(callback);
+                        } else {
+                            callback();
+                        }
+                    }
+                    return _execCb.apply(this, arguments);
+                }
+            }
+        }
+    };
 
     var loadListeners = [];
 
+    /**
+     * Adds a listener that is called after the load event.
+     * @param listener
+     */
     function addLoadListener(listener) {
-        // TODO integrate with requirejs!
-        window.addEventListener('load', listener, false);
+        if (loadListeners.length===0) {
+            var loadEventReceived = false;
+            var scriptLoaderReady = false;
+            window.addEventListener('load', function(event) {
+                loadEventReceived = event;
+                fireIfNeeded();
+            }, false);
+            addBeforeLoadListener(function() {
+                scriptLoaderReady = true;
+                fireIfNeeded();
+            });
+            function fireIfNeeded() {
+                if (loadEventReceived && scriptLoaderReady) {
+                    // Wait another 10ms so all other load listeners of the application that is being tested
+                    // have a chance to be called. Also, we want to be after the last module call of the script loader!
+                    globals.jasmine.setTimeout(function() {
+                        for (var i=0; i<loadListeners.length; i++) {
+                            loadListeners[i](loadEventReceived);
+                        }
+                    },10);
+                }
+            }
+        }
+        loadListeners.push(listener);
     }
 
     return {
@@ -3653,6 +3797,9 @@ jasmineui.define('describeUiServer', ['config', 'jasmineApi', 'persistentData', 
             var specs = this.specs();
             for (var i=0; i<specs.length; i++) {
                 var spec = specs[i];
+                if (!spec.env.specFilter(spec)) {
+                    continue;
+                }
                 var _pageUrl = pageUrl(spec.suite);
                 if (_pageUrl) {
                     pd.specs.push({
