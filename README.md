@@ -9,7 +9,7 @@ Beispielcode zum Kapitel 8 "Die fertige Web-App" im Buch [Mobile Web-Apps mit Ja
         Dazu das Install-Skript `misc/install.sh` für Un*x-Systeme bzw. `misc\install.bat` für Windows ausführen.
 *   Bauen der Backend-Komponente:
     *   Das GitHub-Projekt [rylc-backend](https://github.com/mjswa/rylc-backend) klonen
-    *   In das Verzeichnis `rylc-backend-jar` wechseln
+    *   In das Verzeichnis `rylc-backend` wechseln
     *   Das Backend mittels `mvn clean install -Pproduction` bauen
 *   Bauen des Projekts inkl. Integrationstests: `mvn clean verify -Pintegration`.
     Dazu muss [Chrome](http://www.google.com/chrome) über den Kommandozeilen-Befehl `chrome` gestartet werden können.
