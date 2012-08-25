@@ -7,7 +7,7 @@ Beispielcode zum Kapitel 9 Modularisierung und Build im Buch [Mobile Web-Apps mi
     *   Apache Maven 3.0.4 oder neuer.
 *   Bauen der Backend-Komponente:
     *   [rylc-backend](https://github.com/mjswa/rylc-backend) klonen
-    *   In das Verzeichnis `rylc-backend-jar` wechseln
+    *   In das Verzeichnis `rylc-backend` wechseln
     *   Das Backend mittels `mvn clean install -Pproduction` bauen
 *   Bauen des Projekts inkl. Integrationstests: `mvn clean verify -Pintegration`.
     Dazu muss [Chrome](http://www.google.com/chrome) über den Kommandozeilen-Befehl `chrome` gestartet werden können.
