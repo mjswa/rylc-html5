@@ -8,12 +8,13 @@ define(["jquery", "jquery.mobile"], function($) {
   function createTemporaryPageFromLocationHashSoThatJqmCallsLoadPage() {
     var tempPageId = $.mobile.path.stripHash(location.hash);
     if (tempPageId && !$('#'+tempPageId).length) {
-      $(document).bind("pagecontainercreate", function() {
+      $(window).bind("pagecontainercreate", function() {
         tempPage = $('<div data-role="page" id="'+tempPageId+'"></div>');
         $.mobile.pageContainer.append(tempPage);
       });
     }
   }
+  createTemporaryPageFromLocationHashSoThatJqmCallsLoadPage();
 
   $.mobile.originalLoadPage = $.mobile.loadPage;
   $.mobile.loadPage = function (url, options) {
