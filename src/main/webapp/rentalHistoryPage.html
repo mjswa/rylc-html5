@@ -10,13 +10,13 @@
         <div ngm-if="errorMessage" class="error">{{errorMessage}}</div>
         <div ngm-if="infoMessage()" class="info">{{infoMessage()}}</div>
         <ul data-role="listview" id="rentalHistoryPage_list">
-            <li ng-repeat="rental in rentals | paged:{pageSize:5}" class="rental">
+            <li ng-repeat="rental in rentals | paged:'pager1':5" class="rental">
                 <h4><span class="manufacturer">{{rental.car.manufacturer}}</span> <span class="description">{{rental.car.description}}</span></h4>
                 <p><span class="startDate">{{rental.hireStartDate | simpleDate}}</span> - <span class="endDate">{{rental.hireEndDate | simpleDate}}</span></p>
                 <p class="ui-li-aside">Total: <span class="totalPrice">{{totalPrice(rental) | currency:"&euro;"}}</span></p>
             </li>
-            <li ngm-if="rentals | paged:'hasMore'">
-                <a href="#" ngm-click="rentals | paged:'loadMore'">Mehr...</a>
+            <li ngm-if="pager1.hasMore">
+                <a href="#" ngm-click="pager1.loadMore()">Mehr...</a>
             </li>
         </ul>
     </div>
