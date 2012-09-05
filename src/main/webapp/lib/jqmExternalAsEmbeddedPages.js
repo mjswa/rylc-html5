@@ -3,19 +3,22 @@
  * as external pages with the suffix .html.
  */
 define(["jquery", "jquery.mobile"], function($) {
-  var initialPage;
-  var initialPageId = $.mobile.path.stripHash(location.hash);
-  if (initialPageId && !$('#'+initialPageId).length) {
-    $(document).bind("pagecontainercreate", function() {
-        initialPage = $('<div data-role="page" id="'+initialPageId+'"></div>');
-        $.mobile.pageContainer.append(initialPage);
-    });
+  var tempPage;
+
+  function createTemporaryPageFromLocationHashSoThatJqmCallsLoadPage() {
+    var tempPageId = $.mobile.path.stripHash(location.hash);
+    if (tempPageId && !$('#'+tempPageId).length) {
+      $(document).bind("pagecontainercreate", function() {
+        tempPage = $('<div data-role="page" id="'+tempPageId+'"></div>');
+        $.mobile.pageContainer.append(tempPage);
+      });
+    }
   }
 
   $.mobile.originalLoadPage = $.mobile.loadPage;
   $.mobile.loadPage = function (url, options) {
-    if (initialPage) {
-        initialPage.remove();
+    if (tempPage) {
+        tempPage.remove();
     }
     var match = url.match(/#(\w+)/);
     if (match) {
