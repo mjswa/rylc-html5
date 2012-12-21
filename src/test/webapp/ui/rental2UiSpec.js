@@ -38,21 +38,21 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
   it('should show the expected number of carTypes', function () {
     init(someCarTypes, []);
     runs(function () {
-      expect(count(".selectedCarType > option")).toBe(someCarTypes.length);
+      expect(count("select.selectedCarType > option")).toBe(someCarTypes.length);
     });
   });
 
   it('should show the car type name', function () {
     init([someCarType], []);
     runs(function () {
-      expect(value(".selectedCarType > option")).toBe(someCarType);
+      expect(value("select.selectedCarType > option")).toBe(someCarType);
     });
   });
 
   it('should select the first car type when the page is visited', function () {
     init(someCarTypes, []);
     runs(function () {
-      expect(value(".selectedCarType")).toBe('0');
+      expect(value("select.selectedCarType")).toBe('0');
     });
   });
 
@@ -76,7 +76,7 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
   it('should filter the cars by the selected car type when the car type is changed', function () {
     init(someCarTypes, someCars);
     runs(function () {
-      value(".selectedCarType", 1);
+      value("select.selectedCarType", 1);
     });
     runs(function () {
       expect(count('.car')).toBe(1);
@@ -95,7 +95,7 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
   it('should be active when coming back from third rental page and the values should not change', function () {
     init(someCarTypes, someCars);
     runs(function () {
-      value(".selectedCarType", 1);
+      value("select.selectedCarType", 1);
       click(".selectCar");
     });
     runs(function () {
@@ -106,7 +106,7 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
     });
     runs(function () {
       expect(activePageId()).toBe('rental2Page');
-      expect(value(".selectedCarType")).toBe('1');
+      expect(value("select.selectedCarType")).toBe('1');
     });
   });
 });

@@ -43,7 +43,7 @@ describeUi('rental1', '/rylc-html5/index.html#welcomePage', function () {
     tomorrow.setDate(tomorrow.getDate() + 1);
     init(someCities);
     runs(function () {
-      expect(value(".selectedCity")).toBe('0');
+      expect(value("select.selectedCity")).toBe('0');
       expect(value(".startDate")).toBe(formatDate(today));
       expect(value(".endDate")).toBe(formatDate(tomorrow));
       expect(value(".maxPrice")).toBe('100');
@@ -100,7 +100,7 @@ describeUi('rental1', '/rylc-html5/index.html#welcomePage', function () {
   it('should search with the given search criteria', function () {
     init(someCities);
     runs(function () {
-      value('.selectedCity', someCities[0].id);
+      value('select.selectedCity', someCities[0].id);
       value('.startDate', formatDate(new Date(2011, 10 - 1, 10)));
       value('.endDate', formatDate(new Date(2011, 11 - 1, 11)));
       value('.maxPrice', '150');

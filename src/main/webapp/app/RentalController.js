@@ -1,5 +1,5 @@
 define(function () {
-  function RentalController($scope, rentalService, backendService, $navigate) {
+  function RentalController($scope, rentalService, backendService, $location) {
     var SUCCESS_MESSAGE = "Bestellung erfolgreich entgegengenommen.";
 
     $scope.clearMessages = function () {
@@ -31,14 +31,14 @@ define(function () {
       }, function (errorMessage) {
         $scope.errorMessage = errorMessage;
       });
-      $navigate('#rental1Page');
+      $location.url('#rental1Page');
     };
 
     $scope.searchAvailableCars = function () {
       return backendService.availableCars($scope.city.id, $scope.startDate, $scope.endDate, $scope.maxPrice).then(
         function (cars) {
           $scope.availableCars = cars;
-          $navigate("#rental2Page");
+          $location.url("#rental2Page");
         }, function (errorMessage) {
           $scope.errorMessage = errorMessage;
         });
@@ -54,7 +54,7 @@ define(function () {
 
     $scope.selectCar = function (car) {
       $scope.car = car;
-      $navigate('#rental3Page');
+      $location.url('#rental3Page');
     };
 
     $scope.rentCar = function () {
@@ -62,15 +62,17 @@ define(function () {
         function (rental) {
           $scope.rental = rental;
           $scope.successMessage = SUCCESS_MESSAGE;
-          $navigate('back:#welcomePage');
+          $location.url('#welcomePage');
+          $location.backMode();
         }, function (errorMessage) {
           $scope.errorMessage = errorMessage;
-          $navigate('back:#welcomePage');
+          $location.url('#welcomePage');
+          $location.backMode();
         });
     };
   }
 
-  RentalController.$inject = ['$scope', 'rentalService', 'backendService', '$navigate'];
+  RentalController.$inject = ['$scope', 'rentalService', 'backendService', '$location'];
 
   return RentalController;
 });

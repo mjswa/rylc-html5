@@ -2,12 +2,12 @@
      ngm-pagebeforeshow="rental.prefetchMasterData()" ngm-pagebeforehide="rental.clearMessages()">
     <div data-role="header">
         <h1 class="greeting">Hallo {{auth.customer().name}}</h1>
-        <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
+        <a href="" ngm-vclick="auth.logout()" class="logout ui-btn-right">Logout</a>
     </div>
     <div data-role="content">
         <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
         <div class="success" ngm-if="rental.successMessage">{{rental.successMessage}}</div>
-        <a href="" data-role="button" class="newRental" ngm-click="rental.initRental()">Neue Buchung</a>
+        <a href="" data-role="button" class="newRental" ngm-vclick="rental.initRental()">Neue Buchung</a>
         <a href="#rentalHistoryPage" data-role="button" class="rentalHistory">Buchungen</a>
         <a href="#profilePage" data-role="button" class="profile">Benutzerprofil</a>
     </div>

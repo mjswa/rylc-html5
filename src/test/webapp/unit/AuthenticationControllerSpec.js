@@ -11,8 +11,11 @@ describe('AuthenticationController', function () {
           citiesBackground:jasmine.createSpy()
         };
       });
-      $provide.factory('$navigate', function () {
-        return jasmine.createSpy();
+      $provide.factory('$location', function () {
+        return {
+            url: jasmine.createSpy("url")
+        };
+
       });
     });
     inject(function ($rootScope, $controller) {
@@ -31,13 +34,13 @@ describe('AuthenticationController', function () {
       expect(backendService.login).toHaveBeenCalledWith(username, password);
     }));
 
-    it('should navigate to the welcomePage', inject(function ($navigate, $rootScope) {
+    it('should navigate to the welcomePage', inject(function ($location, $rootScope) {
       scope.username = 'someUser';
       scope.password = 'somePassword';
       loginResultDeferred.resolve();
       scope.login();
       $rootScope.$digest();
-      expect($navigate).toHaveBeenCalledWith('#welcomePage');
+      expect($location.url).toHaveBeenCalledWith('#welcomePage');
     }));
 
     it('should update errorMessage property', inject(function ($rootScope) {

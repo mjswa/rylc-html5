@@ -4,7 +4,7 @@
     <div data-role="header">
         <h1>Autotyp w&auml;hlen</h1>
         <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
-        <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
+        <a href="" ngm-vclick="auth.logout()" class="logout ui-btn-right">Logout</a>
     </div>
     <div data-role="content">
         <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
@@ -13,7 +13,7 @@
         </select>
         <ul data-role="listview" data-inset="true" id="rental2Page_list">
             <li ng-repeat="car in rental.availableCars | filter:rental.carType" class="car">
-                <a href="#" ngm-click="rental.selectCar(car)"
+                <a href="#" ngm-vclick="rental.selectCar(car)"
                    class="selectCar">
                     <span class="carManufacturer">{{car.manufacturer}}</span> <span class="carDescription">{{car.description}}</span>
                     - <span class="carPrice">{{car.price | currency:"&euro;"}}</span>

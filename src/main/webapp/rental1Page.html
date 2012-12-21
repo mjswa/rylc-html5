@@ -4,7 +4,7 @@
     <div data-role="header">
         <h1>PKW suchen</h1>
         <a href="" data-rel="back" class="back">Zur&uuml;ck</a>
-        <a href="" ngm-click="auth.logout()" class="logout ui-btn-right">Logout</a>
+        <a href="" ngm-vclick="auth.logout()" class="logout ui-btn-right">Logout</a>
     </div>
     <div data-role="content" ng-form name="rentalForm">
         <div class="error" ngm-if="rental.errorMessage">{{rental.errorMessage}}</div>
@@ -30,7 +30,7 @@
             <input type="number" id="rental1Page_maxPrice" class="maxPrice" ng-model="rental.maxPrice" ng-required="true">
         </div>
         <button class="search" ng-disabled="!rentalForm.$valid"
-                ngm-click="rental.searchAvailableCars()"
+                ngm-vclick="rental.searchAvailableCars()"
                 data-role="button">Verf&uuml;gbare Autos ermitteln
         </button>
     </div>
