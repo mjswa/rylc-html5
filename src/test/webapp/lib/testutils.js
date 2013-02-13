@@ -1,18 +1,21 @@
-jasmineui.inject(function () {
+(function () {
+  var uit = uitest.current;
+  uit.feature("xhrSensor", "timeoutSensor", "intervalSensor", "jqmAnimationSensor", "angularIntegration", "mobileViewport");
 
   // disable transitions and speed up timeout during ui tests for better test performance
   function jqueryMobileSpeedup() {
-    // Allow at most 20ms as timeouts.
-    var oldTimeout = window.setTimeout;
-    window.setTimeout = function (fn, delay) {
-      if (delay > 20) {
-        delay = 20;
-      }
-      return oldTimeout.call(this, fn, delay);
-    };
-
-    // Disable transitions
-    beforeLoad(function () {
+    uit.prepend(function(window) {
+      // Allow at most 20ms as timeouts.
+      var oldTimeout = window.setTimeout;
+      window.setTimeout = function (fn, delay) {
+        if (delay > 20) {
+          delay = 20;
+        }
+        return oldTimeout.call(this, fn, delay);
+      };
+    });
+    uit.append(function($) {
+      // Disable transitions
       $.mobile.defaultPageTransition = "none";
       $.mobile.defaultDialogTransition = "none";
     });
@@ -20,9 +23,14 @@ jasmineui.inject(function () {
 
   jqueryMobileSpeedup();
 
-  // -----
+  var angularBackendServiceResults,
+      programmedBackendServiceResults;
 
-  var angularBackendServiceResults = {};
+  uit.append(function() {
+    angularBackendServiceResults = {};
+    programmedBackendServiceResults = {};
+  });
+
 
   function angularBackendServiceResult($q, name) {
     var res = backendServiceResult[name];
@@ -41,16 +49,16 @@ jasmineui.inject(function () {
     });
   }
 
-  var programmedBackendServiceResults = {};
-
   function backendServiceResult(serviceName) {
     var res = programmedBackendServiceResults[serviceName];
     if (!res) {
       res = {
         resolve:function (data) {
           this.apply = function (defer) {
-            defer.resolve(data);
-            $("body").scope().$apply();
+            uit.inject(function($rootScope) {
+              defer.resolve(data);
+              $rootScope.$apply();
+            });
           };
           if (angularBackendServiceResults[serviceName]) {
             this.apply(angularBackendServiceResults[serviceName]);
@@ -58,8 +66,10 @@ jasmineui.inject(function () {
         },
         reject:function (data) {
           this.apply = function (defer) {
-            defer.reject(data);
-            $("body").scope().$apply();
+            uit.inject(function($rootScope) {
+              defer.reject(data);
+              $rootScope.$apply();
+            });
           };
           if (angularBackendServiceResults[serviceName]) {
             this.apply(angularBackendServiceResults[serviceName]);
@@ -76,46 +86,52 @@ jasmineui.inject(function () {
   }
 
   function mockBackend() {
-    var services = ['carTypesBackground',
-      'carTypes',
-      'citiesBackground',
-      'cities',
-      'customerByUsername',
-      'rentalsByCustomerId',
-      'availableCars',
-      'rentCar',
-      'login',
-      'logout',
-      'promo'];
+    return uit.inject(function(angular) {
+      var services = ['carTypesBackground',
+        'carTypes',
+        'citiesBackground',
+        'cities',
+        'customerByUsername',
+        'rentalsByCustomerId',
+        'availableCars',
+        'rentCar',
+        'login',
+        'logout',
+        'promo'];
 
-    function backendServiceFactory($q) {
-      var res = {};
-      var customer;
-      for (var i = 0; i < services.length; i++) {
-        var service = services[i];
-        res[service] = createMockBackendService($q, service);
+      function backendServiceFactory($q) {
+        var res = {};
+        var customer;
+        for (var i = 0; i < services.length; i++) {
+          var service = services[i];
+          res[service] = createMockBackendService($q, service);
+        }
+        angularBackendServiceResult($q, 'login').promise.then(function (c) {
+          customer = c;
+        });
+        res.authenticatedCustomer = function () {
+          return customer;
+        };
+        return res;
       }
-      angularBackendServiceResult($q, 'login').promise.then(function (c) {
-        customer = c;
-      });
-      res.authenticatedCustomer = function () {
-        return customer;
-      };
-      return res;
-    }
 
-    backendServiceFactory.$inject = ['$q'];
-    angular.module(["rylc-services"]).factory('backendService', backendServiceFactory);
+      backendServiceFactory.$inject = ['$q'];
+      angular.module(["rylc-services"]).factory('backendService', backendServiceFactory);
+    });
   }
 
   function backendService() {
-    return $("body").injector().get("backendService");
+    return uit.inject(function(backendService) {
+      return backendService;
+    });
   }
 
   // -----
 
   function activePage() {
-    return $.mobile.activePage;
+    return uit.inject(function($) {
+      return $.mobile.activePage;
+    });
   }
 
   function activePageId() {
@@ -126,7 +142,9 @@ jasmineui.inject(function () {
   }
 
   function activatePage$(selector) {
-    return $(selector, activePage());
+    return uit.inject(function($) {
+      return $(selector, activePage());
+    });
   }
 
   function activePageScope() {
@@ -201,13 +219,15 @@ jasmineui.inject(function () {
   // -----
 
   function formatSimpleDate(date) {
-    var injector = $(document.documentElement).injector();
-    return injector.get("utilsService").formatSimpleDate(date);
+    return uit.inject(function(utilsService) {
+      return utilsService.formatSimpleDate(date);
+    });
   }
 
   function formatDate(date) {
-    var injector = $(document.documentElement).injector();
-    return injector.get("utilsService").formatDate(date);
+    return uit.inject(function(utilsService) {
+      return utilsService.formatDate(date);
+    });
   }
 
   // -----
@@ -228,11 +248,14 @@ jasmineui.inject(function () {
   }
 
   function phonegapService() {
-    return $("body").injector().get("phonegapService");
+    return uit.inject(function(phonegapService) {
+      return phonegapService;
+    });
   }
 
   // -----
 
+  window.uit = uit;
   window.mockBackend = mockBackend;
   window.backendService = backendService;
   window.backendServiceResult = backendServiceResult;
@@ -252,4 +275,4 @@ jasmineui.inject(function () {
   window.phonegapService = phonegapService;
   window.phonegapServiceResult = backendServiceResult;
 
-});
+})();

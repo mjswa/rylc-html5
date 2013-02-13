@@ -1,4 +1,6 @@
-describeUi('profile', '/rylc-html5/index.html#profilePage', function () {
+describe('profile', function () {
+  uit.url('/rylc-html5/index.html#profilePage');
+  
   var authenticatedUsername = "someUsername";
   var authenticatedCustomer = {
     id: 42,
@@ -9,28 +11,28 @@ describeUi('profile', '/rylc-html5/index.html#profilePage', function () {
     street: "someStreet"
   };
 
-  beforeLoad(function () {
+  uit.append(function () {
     mockBackend();
     backendServiceResult('login').resolve(authenticatedCustomer);
   });
 
   beforeEach(function () {
     // TODO extract function "setAuthenticatedUser(username, customer)" and move it to testutils.js
-    runs(function () {
+    uit.runs(function () {
       activePageScope().auth.username = authenticatedUsername;
       activePageScope().$root.$digest();
     });
   });
 
   it('should allow to logout', function () {
-    runs(function () {
+    uit.runs(function () {
       click(".logout");
       expect(backendService().logout).toHaveBeenCalled();
     });
   });
 
   it('should show the profile of the authenticated customer', function () {
-    runs(function () {
+    uit.runs(function () {
       expect(value('#profilePage_username')).toBe(authenticatedUsername);
       expect(value('#profilePage_name')).toBe(authenticatedCustomer.name);
       expect(value('#profilePage_city')).toBe(authenticatedCustomer.city);

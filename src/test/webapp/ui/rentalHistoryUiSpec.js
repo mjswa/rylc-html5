@@ -1,29 +1,31 @@
-describeUi('rentalHistory', '/rylc-html5/index.html#rentalHistoryPage', function () {
+describe('rentalHistory', function () {
+  uit.url('/rylc-html5/index.html#rentalHistoryPage');
+
   var authenticatedUsername = "someUsername";
   var authenticatedCustomer = { id:42 };
 
-  beforeLoad(function () {
+  uit.append(function () {
     mockBackend();
     backendServiceResult('login').resolve(authenticatedCustomer);
   });
 
   beforeEach(function () {
     // TODO extract function "setAuthenticatedUser(username, customer)" and move it to testutils.js
-    runs(function () {
+    uit.runs(function () {
       activePageScope().auth.username = authenticatedUsername;
       activePageScope().$root.$digest();
     });
   });
 
   function init(method, data) {
-    runs(function () {
+    uit.runs(function () {
       backendServiceResult('rentalsByCustomerId')[method](data);
     });
   }
 
   it('should allow to logout', function () {
     init('resolve', []);
-    runs(function () {
+    uit.runs(function () {
       click(".logout");
       expect(backendService().logout).toHaveBeenCalled();
     });
@@ -36,7 +38,7 @@ describeUi('rentalHistory', '/rylc-html5/index.html#rentalHistoryPage', function
       {"car":{"description":"Golf", "id":1008, "manufacturer":"VW", "price":100.00}, "hireEndDate":new Date(2011, 10, 07), "hireStartDate":new Date(2011, 10, 07), "id":180}
     ];
     init('resolve', someRentals);
-    runs(function () {
+    uit.runs(function () {
       expect(count('.rental')).toBe(someRentals.length);
     });
   });
@@ -44,7 +46,7 @@ describeUi('rentalHistory', '/rylc-html5/index.html#rentalHistoryPage', function
   it('should show the expected fields for a rental', function () {
     var someRental = {"car":{"description":"Golf", "id":1008, "manufacturer":"VW", "price":100.00}, "hireEndDate":new Date(2011, 10, 07), "hireStartDate":new Date(2011, 10, 07), "id":180};
     init('resolve', [someRental]);
-    runs(function () {
+    uit.runs(function () {
       expect(value(".manufacturer")).toBe(someRental.car.manufacturer);
       expect(value(".description")).toBe(someRental.car.description);
       expect(value(".startDate")).toBe('07.11.2011');
@@ -56,7 +58,7 @@ describeUi('rentalHistory', '/rylc-html5/index.html#rentalHistoryPage', function
 
   it('should show an info message when no rentals found', function () {
     init('resolve', []);
-    runs(function () {
+    uit.runs(function () {
       expect(value('.info')).toBe("Keine Daten gefunden.");
     });
   });
@@ -64,7 +66,7 @@ describeUi('rentalHistory', '/rylc-html5/index.html#rentalHistoryPage', function
   it('should show an error when the backend reports an error', function () {
     var someBackendError = "someBackendError";
     init('reject', someBackendError);
-    runs(function () {
+    uit.runs(function () {
       expect(value('.error')).toBe(someBackendError);
     });
   });

@@ -1,4 +1,6 @@
-describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
+describe('rental2', function () {
+  uit.url('/rylc-html5/index.html#welcomePage');
+  
   var authenticatedCustomer = { id:42, name:"someName" };
   var someCities = [
     {id:10, name:'City A'}
@@ -11,7 +13,7 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
     {"carType":"CarTypeB", "description":"mini", "manufacturer":"smart2", "price":66.00}
   ];
 
-  beforeLoad(function () {
+  uit.append(function () {
     mockBackend();
     backendServiceResult('login').resolve(authenticatedCustomer);
     backendServiceResult('cities').resolve(someCities);
@@ -19,16 +21,16 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
   });
 
   beforeEach(function () {
-    runs(function () {
+    uit.runs(function () {
       click('.newRental');
     });
-    runs(function () {
+    uit.runs(function () {
       click('.search');
     });
   });
 
   function init(carTypes, cars) {
-    runs(function () {
+    uit.runs(function () {
       backendServiceResult('carTypes').resolve(carTypes);
       backendServiceResult('carTypesBackground').resolve(carTypes);
       backendServiceResult('availableCars').resolve(cars);
@@ -37,28 +39,28 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
 
   it('should show the expected number of carTypes', function () {
     init(someCarTypes, []);
-    runs(function () {
+    uit.runs(function () {
       expect(count("select.selectedCarType > option")).toBe(someCarTypes.length);
     });
   });
 
   it('should show the car type name', function () {
     init([someCarType], []);
-    runs(function () {
+    uit.runs(function () {
       expect(value("select.selectedCarType > option")).toBe(someCarType);
     });
   });
 
   it('should select the first car type when the page is visited', function () {
     init(someCarTypes, []);
-    runs(function () {
+    uit.runs(function () {
       expect(value("select.selectedCarType")).toBe('0');
     });
   });
 
   it('should show the car fields', function () {
     init([someCarType], [someCar]);
-    runs(function () {
+    uit.runs(function () {
       expect(value(".carManufacturer")).toBe(someCar.manufacturer);
       expect(value(".carDescription")).toBe(someCar.description);
       expect(value(".carPrice")).toBe('\u20AC' + someCar.price + '.00');
@@ -67,7 +69,7 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
 
   it('should filter the cars by the selected car type when the page is visited', function () {
     init(someCarTypes, someCars);
-    runs(function () {
+    uit.runs(function () {
       expect(count('.car')).toBe(1);
       expect(value(".carManufacturer")).toBe(someCars[0].manufacturer);
     });
@@ -75,10 +77,10 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
 
   it('should filter the cars by the selected car type when the car type is changed', function () {
     init(someCarTypes, someCars);
-    runs(function () {
+    uit.runs(function () {
       value("select.selectedCarType", 1);
     });
-    runs(function () {
+    uit.runs(function () {
       expect(count('.car')).toBe(1);
       expect(value(".carManufacturer")).toBe(someCars[1].manufacturer);
     });
@@ -86,7 +88,7 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
 
   it('should allow to logout', function () {
     init([], []);
-    runs(function () {
+    uit.runs(function () {
       click(".logout");
       expect(backendService().logout).toHaveBeenCalled();
     });
@@ -94,17 +96,17 @@ describeUi('rental2', '/rylc-html5/index.html#welcomePage', function () {
 
   it('should be active when coming back from third rental page and the values should not change', function () {
     init(someCarTypes, someCars);
-    runs(function () {
+    uit.runs(function () {
       value("select.selectedCarType", 1);
       click(".selectCar");
     });
-    runs(function () {
+    uit.runs(function () {
       expect(activePageId()).toBe('rental3Page');
     });
-    runs(function () {
+    uit.runs(function () {
       click('.back');
     });
-    runs(function () {
+    uit.runs(function () {
       expect(activePageId()).toBe('rental2Page');
       expect(value("select.selectedCarType")).toBe('1');
     });

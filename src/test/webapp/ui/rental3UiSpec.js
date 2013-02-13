@@ -1,4 +1,6 @@
-describeUi('rental3', '/rylc-html5/index.html#welcomePage', function () {
+describe('rental3', function () {
+  uit.url('/rylc-html5/index.html#welcomePage');
+  
   var authenticatedCustomer = { id:42, name:"someName" };
   var someCity = {id:42, name:'City A'};
   var someCarType = 'CarTypeA';
@@ -6,7 +8,7 @@ describeUi('rental3', '/rylc-html5/index.html#welcomePage', function () {
   var startDate = new Date(2011, 10 - 1, 10);
   var endDate = new Date(2011, 10 - 1, 11);
 
-  beforeLoad(function () {
+  uit.append(function () {
     mockBackend();
     backendServiceResult('login').resolve(authenticatedCustomer);
     var cities = [someCity];
@@ -20,21 +22,21 @@ describeUi('rental3', '/rylc-html5/index.html#welcomePage', function () {
   });
 
   beforeEach(function () {
-    runs(function () {
+    uit.runs(function () {
       click('.newRental');
     });
-    runs(function () {
+    uit.runs(function () {
       value('.startDate', formatDate(startDate));
       value('.endDate', formatDate(endDate));
       click('.search');
     });
-    runs(function () {
+    uit.runs(function () {
       click('.selectCar');
     });
   });
 
   it('should show the rental data', function () {
-    runs(function () {
+    uit.runs(function () {
       expect(value('.carManufacturer')).toBe(someCar.manufacturer);
       expect(value('.carDescription')).toBe(someCar.description);
       expect(value('.carType')).toBe(someCar.carType);
@@ -47,16 +49,16 @@ describeUi('rental3', '/rylc-html5/index.html#welcomePage', function () {
   });
 
   it('should rent with the given data', function () {
-    runs(function () {
+    uit.runs(function () {
       click('.rentCar');
     });
-    runs(function () {
+    uit.runs(function () {
       expect(backendService().rentCar).toHaveBeenCalledWith(someCar.id, startDate, endDate);
     });
   });
 
   it('should allow to logout', function () {
-    runs(function () {
+    uit.runs(function () {
       click(".logout");
       expect(backendService().logout).toHaveBeenCalled();
     });
@@ -64,22 +66,22 @@ describeUi('rental3', '/rylc-html5/index.html#welcomePage', function () {
 
   it('should show the welcome page after rent and show an error message when an error occurred', function () {
     var someBackendError = "someBackendError";
-    runs(function () {
+    uit.runs(function () {
       backendServiceResult('rentCar').reject(someBackendError);
       click(".rentCar");
     });
-    runs(function () {
+    uit.runs(function () {
       expect(value('.error')).toBe(someBackendError);
       expect(activePageId()).toBe('welcomePage');
     });
   });
 
   it('should show the welcome page after rent and show a success message when no error occurred', function () {
-    runs(function () {
+    uit.runs(function () {
       backendServiceResult('rentCar').resolve([]);
       click(".rentCar");
     });
-    runs(function () {
+    uit.runs(function () {
       expect(value('.success')).toBe('Bestellung erfolgreich entgegengenommen.');
       expect(activePageId()).toBe('welcomePage');
     });
