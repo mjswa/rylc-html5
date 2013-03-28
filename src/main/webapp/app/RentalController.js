@@ -63,11 +63,11 @@ define(function () {
           $scope.rental = rental;
           $scope.successMessage = SUCCESS_MESSAGE;
           $location.url('#welcomePage');
-          $location.backMode();
+          $location.back();
         }, function (errorMessage) {
           $scope.errorMessage = errorMessage;
           $location.url('#welcomePage');
-          $location.backMode();
+          $location.back();
         });
     };
   }
