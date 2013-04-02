@@ -1,6 +1,6 @@
-/*! uitest.js - v0.9.1-SNAPSHOT - 2013-03-26
-* https://github.com/tigbro/uitest.js
-* Copyright (c) 2013 Tobias Bosch; Licensed MIT */
+/*! uitest.js - v0.9.2-SNAPSHOT - 2013-04-02
+ * https://github.com/tigbro/uitest.js
+ * Copyright (c) 2013 Tobias Bosch; Licensed MIT */
 /**
  * Simple implementation of AMD require/define assuming all
  * modules are named and loaded explicitly, and require is called
@@ -192,120 +192,120 @@ uitest.define('annotate', ['utils'], function(utils) {
     return annotate;
 });
 uitest.define('config', [], function() {
-	function create() {
-		return new Create();
-	}
+    function create() {
+        return new Create();
+    }
 
-	function Create() {
-		this._data = {};
-	}
+    function Create() {
+        this._data = {};
+    }
 
-	Create.prototype = {
-		parent: simpleProp("_parent"),
-		sealed: simpleProp("_sealed"),
-		url: dataProp("url"),
-		trace: dataProp("trace"),
-		feature: dataAdder("features", featureValidator),
-		append: dataAdder("appends"),
-		prepend: dataAdder("prepends"),
-		intercept: dataAdder("intercepts"),
-		buildConfig: buildConfig
-	};
+    Create.prototype = {
+        parent: simpleProp("_parent"),
+        sealed: simpleProp("_sealed"),
+        url: dataProp("url"),
+        trace: dataProp("trace"),
+        feature: dataAdder("features", featureValidator),
+        append: dataAdder("appends"),
+        prepend: dataAdder("prepends"),
+        intercept: dataAdder("intercepts"),
+        buildConfig: buildConfig
+    };
 
-	function getterSetter(getter, setter) {
-		return result;
+    function getterSetter(getter, setter) {
+        return result;
 
-		function result() {
-			if(arguments.length === 0) {
-				return getter.call(this);
-			} else {
-				setter.apply(this, arguments);
-				return this;
-			}
-		}
-	}
+        function result() {
+            if(arguments.length === 0) {
+                return getter.call(this);
+            } else {
+                setter.apply(this, arguments);
+                return this;
+            }
+        }
+    }
 
-	function simpleProp(name) {
-		return getterSetter(function() {
-			return this[name];
-		}, function(newValue) {
-			this[name] = newValue;
-		});
-	}
+    function simpleProp(name) {
+        return getterSetter(function() {
+            return this[name];
+        }, function(newValue) {
+            this[name] = newValue;
+        });
+    }
 
-	function dataProp(name, checkFn) {
-		return getterSetter(function() {
-			return this._data[name];
-		}, function(newValue) {
-			checkNotSealed(this);
-			if (checkFn) {
-				checkFn(newValue);
-			}
-			this._data[name] = newValue;
-		});
-	}
+    function dataProp(name, checkFn) {
+        return getterSetter(function() {
+            return this._data[name];
+        }, function(newValue) {
+            checkNotSealed(this);
+            if (checkFn) {
+                checkFn(newValue);
+            }
+            this._data[name] = newValue;
+        });
+    }
 
-	function dataAdder(name, checkFn) {
-		return getterSetter(function() {
-			return this._data[name];
-		}, function() {
-			var values = Array.prototype.slice.call(arguments),
-				arr = this._data[name];
-			checkNotSealed(this);
-			if (checkFn) {
-				checkFn(values);
-			}
-			if (!arr) {
-				arr = this._data[name] = [];
-			}
-			arr.push.apply(arr, values);
-		});
-	}
+    function dataAdder(name, checkFn) {
+        return getterSetter(function() {
+            return this._data[name];
+        }, function() {
+            var values = Array.prototype.slice.call(arguments),
+                arr = this._data[name];
+            checkNotSealed(this);
+            if (checkFn) {
+                checkFn(values);
+            }
+            if (!arr) {
+                arr = this._data[name] = [];
+            }
+            arr.push.apply(arr, values);
+        });
+    }
 
-	function featureValidator(features) {
-		var i;
-		for (i=0; i<features.length; i++) {
-			if (!uitest.define.findModuleDefinition("run/feature/"+features[i])) {
-				throw new Error("Unknown feature: "+features[i]);
-			}
-		}
-	}
+    function featureValidator(features) {
+        var i;
+        for (i=0; i<features.length; i++) {
+            if (!uitest.define.findModuleDefinition("run/feature/"+features[i])) {
+                throw new Error("Unknown feature: "+features[i]);
+            }
+        }
+    }
 
-	function checkNotSealed(self) {
-		if (self.sealed()) {
-			throw new Error("This configuration cannot be modified.");
-		}
-	}
+    function checkNotSealed(self) {
+        if (self.sealed()) {
+            throw new Error("This configuration cannot be modified.");
+        }
+    }
 
-	function buildConfig(target) {
-		target = target || {
-			features: [],
-			appends: [],
-			prepends: [],
-			intercepts: []
-		};
-		if (this.parent()) {
-			this.parent().buildConfig(target);
-		}
-		var prop, value, oldValue,
+    function buildConfig(target) {
+        target = target || {
+            features: [],
+            appends: [],
+            prepends: [],
+            intercepts: []
+        };
+        if (this.parent()) {
+            this.parent().buildConfig(target);
+        }
+        var prop, value, oldValue,
             data = this._data;
-		for(prop in data) {
-			value = data[prop];
-			if(isArray(value)) {
-				value = (target[prop] || []).concat(value);
-			}
-			target[prop] = value;
-		}
-		return target;
-	}
+        for(prop in data) {
+            value = data[prop];
+            if(isArray(value)) {
+                value = (target[prop] || []).concat(value);
+            }
+            target[prop] = value;
+        }
+        return target;
+    }
 
-	function isArray(obj) {
-		return obj && obj.push;
-	}
+    function isArray(obj) {
+        return obj && obj.push;
+    }
 
-	return {
-		create: create
-	};
+    return {
+        create: create
+    };
 });
 uitest.define('documentUtils', ['global'], function(global) {
 
@@ -313,8 +313,8 @@ uitest.define('documentUtils', ['global'], function(global) {
     // 1. opening script tag
     // 2. content of src attribute
     // 3. text content of script element.
-    SCRIPT_RE = /(<script(?:[^>]*(src=\s*"([^"]+)"))?[^>]*>)([\s\S]*?)<\/script>/ig,
-    EMPTY_TAG_RE = /(<([^>\s]+)[^>]*)\/>/ig;
+        SCRIPT_RE = /(<script(?:[^>]*(src=\s*"([^"]+)"))?[^>]*>)([\s\S]*?)<\/script>/ig,
+        EMPTY_TAG_RE = /(<([^>\s]+)[^>]*)\/>/ig;
 
     function serializeDocType(doc) {
         var node = doc.doctype;
@@ -450,11 +450,11 @@ uitest.define('facade', ['config', 'global', 'sniffer'], function(config, global
 
     function create() {
         var res = {
-            ready: ready,
-            realoded: reloaded,
-            reloaded: reloaded,
-            inject: inject
-        },
+                ready: ready,
+                realoded: reloaded,
+                reloaded: reloaded,
+                inject: inject
+            },
             i, fnName, configInstance;
         configInstance = res._config = config.create();
         for(i = 0; i < CONFIG_FUNCTIONS.length; i++) {
@@ -625,7 +625,7 @@ uitest.define('facade', ['config', 'global', 'sniffer'], function(config, global
     };
 });
 uitest.define('global', [], function() {
-	return window;
+    return window;
 });
 
 uitest.define('run/defaultScriptAdder', ['run/config', 'run/instrumentor', 'documentUtils', 'run/injector', 'run/testframe', 'annotate', 'run/logger', 'urlParser', 'utils'], function(runConfig, instrumentor, docUtils, injector, testframe, annotate, logger, urlParser, utils) {
@@ -768,10 +768,10 @@ uitest.define('run/defaultScriptAdder', ['run/config', 'run/instrumentor', 'docu
                     fn.delegate = true;
                     try {
                         return injector.inject(matchingInterceptsByName[fnName].callback, self, [originalArgsByName,
-                        {
-                            $delegate: $delegate
-                        },
-                        win]);
+                            {
+                                $delegate: $delegate
+                            },
+                            win]);
                     } finally {
                         fn.delegate = false;
                     }
@@ -1072,59 +1072,59 @@ uitest.define('run/feature/xhrSensor', ['run/config', 'run/ready'], function(run
         var OldXHR = window.XMLHttpRequest;
         var DONE = 4;
         var newXhr = function() {
-                var self = this;
-                this.origin = new OldXHR();
+            var self = this;
+            this.origin = new OldXHR();
 
-                function copyState() {
-                    for(var i = 0; i < copyStateFields.length; i++) {
-                        var field = copyStateFields[i];
-                        try {
-                            self[field] = self.origin[field];
-                        } catch(_) {}
-                    }
+            function copyState() {
+                for(var i = 0; i < copyStateFields.length; i++) {
+                    var field = copyStateFields[i];
+                    try {
+                        self[field] = self.origin[field];
+                    } catch(_) {}
                 }
+            }
 
-                function proxyMethod(name) {
-                    self[name] = function() {
-                        if(name === 'send') {
-                            ready = false;
-                            startCounter++;
-                        } else if(name === 'abort') {
-                            ready = true;
-                        }
-                        // Note: Can't use apply here, as IE7 does not
-                        // support apply for XHR methods...
-                        var res;
-                        if (arguments.length===0) {
-                            res = self.origin[name]();
-                        } else if (arguments.length===1) {
-                            res = self.origin[name](arguments[0]);
-                        } else if (arguments.length===2) {
-                            res = self.origin[name](arguments[0], arguments[1]);
-                        } else if (arguments.length===3) {
-                            res = self.origin[name](arguments[0], arguments[1], arguments[2]);
-                        } else {
-                            throw new Error("Too many arguments for the xhr proxy: "+arguments.length);
-                        }
-                        copyState();
-                        return res;
-                    };
-                }
-
-                for(var i = 0; i < proxyMethods.length; i++) {
-                    proxyMethod(proxyMethods[i]);
-                }
-                this.origin.onreadystatechange = function() {
-                    if(self.origin.readyState === DONE) {
+            function proxyMethod(name) {
+                self[name] = function() {
+                    if(name === 'send') {
+                        ready = false;
+                        startCounter++;
+                    } else if(name === 'abort') {
                         ready = true;
                     }
-                    copyState();
-                    if(self.onreadystatechange) {
-                        self.onreadystatechange.apply(self.origin, arguments);
+                    // Note: Can't use apply here, as IE7 does not
+                    // support apply for XHR methods...
+                    var res;
+                    if (arguments.length===0) {
+                        res = self.origin[name]();
+                    } else if (arguments.length===1) {
+                        res = self.origin[name](arguments[0]);
+                    } else if (arguments.length===2) {
+                        res = self.origin[name](arguments[0], arguments[1]);
+                    } else if (arguments.length===3) {
+                        res = self.origin[name](arguments[0], arguments[1], arguments[2]);
+                    } else {
+                        throw new Error("Too many arguments for the xhr proxy: "+arguments.length);
                     }
+                    copyState();
+                    return res;
                 };
+            }
+
+            for(var i = 0; i < proxyMethods.length; i++) {
+                proxyMethod(proxyMethods[i]);
+            }
+            this.origin.onreadystatechange = function() {
+                if(self.origin.readyState === DONE) {
+                    ready = true;
+                }
                 copyState();
+                if(self.onreadystatechange) {
+                    self.onreadystatechange.apply(self.origin, arguments);
+                }
             };
+            copyState();
+        };
         window.XMLHttpRequest = newXhr;
     }
 
@@ -1137,48 +1137,48 @@ uitest.define('run/feature/xhrSensor', ['run/config', 'run/ready'], function(run
 });
 uitest.define('run/injector', ['annotate', 'utils'], function(annotate, utils) {
 
-	var defaultResolvers = [];
+    var defaultResolvers = [];
 
-	function inject(fn, self, values) {
-		var argNames = annotate(fn),
-			argValues = [],
-			i;
-		fn = utils.isArray(fn)?fn[fn.length-1]:fn;
-		for (i=0; i<argNames.length; i++) {
-			argValues.push(resolveArgIncludingDefaultResolvers(argNames[i], values));
-		}
-		return fn.apply(self, argValues);
-	}
+    function inject(fn, self, values) {
+        var argNames = annotate(fn),
+            argValues = [],
+            i;
+        fn = utils.isArray(fn)?fn[fn.length-1]:fn;
+        for (i=0; i<argNames.length; i++) {
+            argValues.push(resolveArgIncludingDefaultResolvers(argNames[i], values));
+        }
+        return fn.apply(self, argValues);
+    }
 
-	function resolveArgIncludingDefaultResolvers(argName, resolvers) {
-		var resolved = resolveArg(argName, resolvers);
-		if (resolved===undefined) {
-			resolved = resolveArg(argName, defaultResolvers);
-		}
-		return resolved;
-	}
+    function resolveArgIncludingDefaultResolvers(argName, resolvers) {
+        var resolved = resolveArg(argName, resolvers);
+        if (resolved===undefined) {
+            resolved = resolveArg(argName, defaultResolvers);
+        }
+        return resolved;
+    }
 
-	function resolveArg(argName, resolvers) {
-		var i, resolver, resolved;
-		for (i=0; i<resolvers.length && !resolved; i++) {
-			resolver = resolvers[i];
-			if (utils.isFunction(resolver)) {
-				resolved = resolver(argName);
-			} else {
-				resolved = resolver[argName];
-			}
-		}
-		return resolved;
-	}
+    function resolveArg(argName, resolvers) {
+        var i, resolver, resolved;
+        for (i=0; i<resolvers.length && !resolved; i++) {
+            resolver = resolvers[i];
+            if (utils.isFunction(resolver)) {
+                resolved = resolver(argName);
+            } else {
+                resolved = resolver[argName];
+            }
+        }
+        return resolved;
+    }
 
-	function addDefaultResolver(resolver) {
-		defaultResolvers.push(resolver);
-	}
+    function addDefaultResolver(resolver) {
+        defaultResolvers.push(resolver);
+    }
 
-	return {
-		inject: inject,
-		addDefaultResolver: addDefaultResolver
-	};
+    return {
+        inject: inject,
+        addDefaultResolver: addDefaultResolver
+    };
 });
 uitest.define('run/instrumentor', ['documentUtils', 'run/config', 'run/logger', 'global', 'run/testframe', 'run/sniffer'], function(docUtils, runConfig, logger, global, testframe, sniffer) {
 
@@ -1205,7 +1205,7 @@ uitest.define('run/instrumentor', ['documentUtils', 'run/config', 'run/logger', 
                 html = preprocessors[i].processor(html);
             }
 
-            // We need to unpack empty tags to open/close tags here, 
+            // We need to unpack empty tags to open/close tags here,
             // as the new document is always a normal html document. E.g. empty script tags
             // (<script.../>) would result in the next script tag to not be executed!
             html = docUtils.makeEmptyTagsToOpenCloseTags(html);
@@ -1235,7 +1235,7 @@ uitest.define('run/instrumentor', ['documentUtils', 'run/config', 'run/logger', 
         // (e.g. Android 2.3 browser and IE<10).
 
         // No need to care for:
-        // - changing globals: We rewrite the document later which will 
+        // - changing globals: We rewrite the document later which will
         //   revert all globals (see testframe).
         // - modification of the DOM using document.*: document.* access our always new document.
 
@@ -1365,50 +1365,50 @@ uitest.define('run/instrumentor', ['documentUtils', 'run/config', 'run/logger', 
 });
 uitest.define('run/loadSensor', ['run/ready', 'run/config'], function(readyModule, runConfig) {
 
-	var count = 0,
-		ready, win, doc, waitForDocComplete;
+    var count = 0,
+        ready, win, doc, waitForDocComplete;
 
-	init();
-	runConfig.appends.push(function(window, document) {
-		win = window;
-		doc = document;
-		waitForDocComplete = true;
-	});
+    init();
+    runConfig.appends.push(function(window, document) {
+        win = window;
+        doc = document;
+        waitForDocComplete = true;
+    });
 
-	loadSensor.reloaded = reloaded;
+    loadSensor.reloaded = reloaded;
 
-	readyModule.addSensor("load", loadSensor);
-	return loadSensor;
+    readyModule.addSensor("load", loadSensor);
+    return loadSensor;
 
-	function init() {
-		ready = false;
-		waitForDocComplete = false;
-	}
+    function init() {
+        ready = false;
+        waitForDocComplete = false;
+    }
 
-	function loadSensor() {
-		if (waitForDocComplete && docReady(doc)) {
-			waitForDocComplete = false;
-			// this timeout is required for IE, as it sets the
-			// readyState to "interactive" before the DOMContentLoaded event.
-			win.setTimeout(function() {
-				ready = true;
-			},1);
-		}
-		return {
-			count: count,
-			ready: ready
-		};
-	}
+    function loadSensor() {
+        if (waitForDocComplete && docReady(doc)) {
+            waitForDocComplete = false;
+            // this timeout is required for IE, as it sets the
+            // readyState to "interactive" before the DOMContentLoaded event.
+            win.setTimeout(function() {
+                ready = true;
+            },1);
+        }
+        return {
+            count: count,
+            ready: ready
+        };
+    }
 
-	function docReady(doc) {
-		return doc.readyState==='complete' || doc.readyState==='interactive';
-	}
+    function docReady(doc) {
+        return doc.readyState==='complete' || doc.readyState==='interactive';
+    }
 
-	function reloaded(callback) {
-		count++;
-		init();
-		readyModule.ready(callback);
-	}
+    function reloaded(callback) {
+        count++;
+        init();
+        readyModule.ready(callback);
+    }
 });
 
 uitest.define('run/logger', ['global', 'run/config'], function(global, runConfig) {
@@ -1428,69 +1428,69 @@ uitest.define('run/logger', ['global', 'run/config'], function(global, runConfig
 
 uitest.define('run/ready', ['run/injector', 'global', 'run/logger'], function(injector, global, logger) {
 
-	var sensorInstances = {};
+    var sensorInstances = {};
 
-	function addSensor(name, sensor) {
-		sensorInstances[name] = sensor;
-	}
+    function addSensor(name, sensor) {
+        sensorInstances[name] = sensor;
+    }
 
-	// Goal:
-	// - Detect async work started by events that cannot be tracked
-	//   (e.g. scroll event, hashchange event, popState event).
-	// - Detect the situation where async work starts another async work
-	//
-	// Algorithm:
-	// Wait until all readySensors did not change for 50ms.
-	// Note: We already tested with 10ms, but that did not work well
-	// for popState events...
+    // Goal:
+    // - Detect async work started by events that cannot be tracked
+    //   (e.g. scroll event, hashchange event, popState event).
+    // - Detect the situation where async work starts another async work
+    //
+    // Algorithm:
+    // Wait until all readySensors did not change for 50ms.
+    // Note: We already tested with 10ms, but that did not work well
+    // for popState events...
 
-	function ready(listener) {
-		var sensorStatus;
+    function ready(listener) {
+        var sensorStatus;
 
-		function restart() {
-			sensorStatus = aggregateSensorStatus(sensorInstances);
-			if(sensorStatus.busySensors.length !== 0) {
-				logger.log("ready waiting for [" + sensorStatus.busySensors + "]");
-				global.setTimeout(restart, 10);
-			} else {
-				global.setTimeout(ifNoAsyncWorkCallListenerElseRestart, 50);
-			}
-		}
+        function restart() {
+            sensorStatus = aggregateSensorStatus(sensorInstances);
+            if(sensorStatus.busySensors.length !== 0) {
+                logger.log("ready waiting for [" + sensorStatus.busySensors + "]");
+                global.setTimeout(restart, 10);
+            } else {
+                global.setTimeout(ifNoAsyncWorkCallListenerElseRestart, 50);
+            }
+        }
 
-		function ifNoAsyncWorkCallListenerElseRestart() {
-			var currentSensorStatus = aggregateSensorStatus(sensorInstances);
-			if(currentSensorStatus.busySensors.length === 0 && currentSensorStatus.count === sensorStatus.count) {
-				injector.inject(listener, null, []);
-			} else {
-				restart();
-			}
-		}
+        function ifNoAsyncWorkCallListenerElseRestart() {
+            var currentSensorStatus = aggregateSensorStatus(sensorInstances);
+            if(currentSensorStatus.busySensors.length === 0 && currentSensorStatus.count === sensorStatus.count) {
+                injector.inject(listener, null, []);
+            } else {
+                restart();
+            }
+        }
 
-		restart();
-	}
+        restart();
+    }
 
-	function aggregateSensorStatus(sensorInstances) {
-		var count = 0,
-			busySensors = [],
-			sensorName, sensor, sensorStatus;
-		for(sensorName in sensorInstances) {
-			sensor = sensorInstances[sensorName];
-			sensorStatus = sensor();
-			count += sensorStatus.count;
-			if(!sensorStatus.ready) {
-				busySensors.push(sensorName);
-			}
-		}
-		return {
-			count: count,
-			busySensors: busySensors
-		};
-	}
+    function aggregateSensorStatus(sensorInstances) {
+        var count = 0,
+            busySensors = [],
+            sensorName, sensor, sensorStatus;
+        for(sensorName in sensorInstances) {
+            sensor = sensorInstances[sensorName];
+            sensorStatus = sensor();
+            count += sensorStatus.count;
+            if(!sensorStatus.ready) {
+                busySensors.push(sensorName);
+            }
+        }
+        return {
+            count: count,
+            busySensors: busySensors
+        };
+    }
 
-	return {
-		addSensor: addSensor,
-		ready: ready
-	};
+    return {
+        addSensor: addSensor,
+        ready: ready
+    };
 });
 uitest.define('run/requirejsScriptAdder', ['run/config', 'run/instrumentor', 'run/defaultScriptAdder', 'documentUtils', 'run/injector', 'run/logger', 'utils', 'urlParser'], function(runConfig, instrumentor, defaultScriptAdder, docUtils, injector, logger, utils, urlParser) {
     var REQUIRE_JS_RE = /require[\W]/,
@@ -1660,8 +1660,8 @@ uitest.define('run/testframe', ['urlParser', 'global', 'top', 'run/config', 'run
         }
         var wrapper = doc.createElement("div");
         wrapper.innerHTML = '<iframe id="'+WINDOW_ID+'" '+
-                            'width="100%" height="100%" '+
-                            'style="position: absolute; top: 0; left: 0; background-color:white; border: 0px;"></iframe>';
+            'width="100%" height="100%" '+
+            'style="position: absolute; top: 0; left: 0; background-color:white; border: 0px;"></iframe>';
 
         frameElement = wrapper.firstChild;
         frameElement.style.zIndex = 100;
@@ -1733,7 +1733,7 @@ uitest.define('run/testframe', ['urlParser', 'global', 'top', 'run/config', 'run
         }
 
         function rewriteWithoutJsUrl() {
-            // We replace the content using an inline script, 
+            // We replace the content using an inline script,
             // so that the window keeps it's original url although we replace it's content!
             // Right now, we only need this for FF, as it does not open javascript urls
             // with the same url as the previous document.
@@ -1742,8 +1742,8 @@ uitest.define('run/testframe', ['urlParser', 'global', 'top', 'run/config', 'run
             // To support xhtml on FF, another idea would be to create a new
             // iframe and modify it's location using history.pushState,
             // so that relative scripts, ... of the new content are loaded correctly.
-            // However, FF throws an exception if history.pushState is used on 
-            // a new frame that was filled using document.open/write/close :-(            
+            // However, FF throws an exception if history.pushState is used on
+            // a new frame that was filled using document.open/write/close :-(
             win.newContent = html;
             var sn = win.document.createElement("script");
             sn.setAttribute("id", "rewriteScript");
