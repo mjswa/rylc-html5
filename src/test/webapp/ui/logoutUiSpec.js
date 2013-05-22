@@ -3,6 +3,7 @@
  */
 describe('logout', function () {
   uit.url('/rylc-html5/index.html#logoutTestPage');
+  uit.feature("multiPage");
   uit.append(function ($) {
     $("#loginPage").after('<div id="logoutTestPage" data-role="page"></div>');
   });
@@ -12,7 +13,7 @@ describe('logout', function () {
       window.flag = true;
       backendService().logout();
     });
-    uit.runsAfterReload(function (window) {
+    uit.runs(function (window) {
       expect(window.flag).toBeFalsy();
     });
   });
@@ -21,7 +22,7 @@ describe('logout', function () {
     uit.runs(function () {
       backendService().logout();
     });
-    uit.runsAfterReload(function () {
+    uit.runs(function () {
       expect(activePageId()).toBe('loginPage');
     });
   });
